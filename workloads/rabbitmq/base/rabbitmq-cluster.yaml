@@ -1,0 +1,11 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/component: message-broker
+spec:
+  replicas: 3
+  service:
+    type: ClusterIP
