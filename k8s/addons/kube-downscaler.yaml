@@ -1,0 +1,70 @@
+# -------------------------------------------------------------
+# 평일-09:00~24:00 동작(야간 절전), 주말-절전
+# -------------------------------------------------------------
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: kube-downscaler
+# ---
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: kube-downscaler
+#   namespace: kube-downscaler
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRole
+# metadata:
+#   name: kube-downscaler
+# rules:
+#   - apiGroups: ["apps"]
+#     resources: ["deployments", "statefulsets"]
+#     verbs: ["get", "list", "watch", "update", "patch"]
+#   - apiGroups: [""]
+#     resources: ["namespaces"]
+#     verbs: ["get", "list", "watch"]
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRoleBinding
+# metadata:
+#   name: kube-downscaler
+# roleRef:
+#   apiGroup: rbac.authorization.k8s.io
+#   kind: ClusterRole
+#   name: kube-downscaler
+# subjects:
+#   - kind: ServiceAccount
+#     name: kube-downscaler
+#     namespace: kube-downscaler
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: kube-downscaler
+#   namespace: kube-downscaler
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: kube-downscaler
+#   template:
+#     metadata:
+#       labels:
+#         app: kube-downscaler
+#     spec:
+#       serviceAccountName: kube-downscaler
+#       containers:
+#         - name: kube-downscaler
+#           image: codeberg.org/hjacobs/kube-downscaler:24.2.0
+#           args:
+#             # 평일(월-금) 09:00 ~ 24:00(자정) 가동 / 야간(00:00~09:00) 및 주말 다운스케일
+#             - --default-uptime=Mon-Fri 09:00-24:00 Asia/Seoul
+#             - --interval=60
+#             - --exclude-namespaces=kube-system,karpenter,kube-downscaler,argocd,argo-rollouts,prometheus
+#           resources:
+#             requests:
+#               cpu: 20m
+#               memory: 32Mi
+#             limits:
+#               cpu: 100m
+#               memory: 128Mi

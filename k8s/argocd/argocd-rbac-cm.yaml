@@ -1,0 +1,19 @@
+# 팀원 admin 권한 매핑
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-rbac-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  policy.default: role:readonly
+  policy.csv: |
+    # 팀원들 깃허브 ID에 관리자 권한 부여
+    g, yimjongwon, role:admin
+    g, evertonian19, role:admin
+    g, KTCLIF, role:admin
+    g, parkyhun, role:admin
+    g, kmkben0615, role:admin

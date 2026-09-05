@@ -1,0 +1,90 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: total-backend-ingress
+  namespace: backend # 백엔드 서비스 파드들이 있는 네임스페이스
+  annotations:
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:596601390909:certificate/30f62fc0-4cb0-4201-990f-6ad487fa7240"
+    
+    # 프론트엔드와 동일한 그룹명 지정 (단일 ALB 공유)
+    alb.ingress.kubernetes.io/group.name: "main-alb-group"
+    
+    # 프론트엔드(10)보다 먼저 /api/* 경로를 가로채도록 우선순위를 1로 지정
+    alb.ingress.kubernetes.io/group.order: "1"
+    
+    # 백엔드 공통 헬스체크
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTP"
+    alb.ingress.kubernetes.io/healthcheck-port: "traffic-port"
+    alb.ingress.kubernetes.io/success-codes: "200-399"
+spec:
+  ingressClassName: alb
+  rules:
+    - host: "cloudyim.store"
+      http:
+        paths:
+          # 1. 인증/인가 도메인
+          - path: /api/v1/auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 8080
+
+          # 2. 주문 도메인
+          - path: /api/v1/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 8080
+
+          # 3. 결제 도메인
+          - path: /api/v1/payments
+            pathType: Prefix
+            backend:
+              service:
+                name: payment-service
+                port:
+                  number: 8080
+
+          # 4. 상품 도메인
+          - path: /api/v1/products
+            pathType: Prefix
+            backend:
+              service:
+                name: product-service
+                port:
+                  number: 8080
+
+          # 5. 풀필먼트 - 주문관리(OMS)
+          - path: /api/v1/oms
+            pathType: Prefix
+            backend:
+              service:
+                name: oms-service
+                port:
+                  number: 8080
+
+          # 6. 풀필먼트 - 창고관리(WMS)
+          - path: /api/v1/wms
+            pathType: Prefix
+            backend:
+              service:
+                name: wms-service
+                port:
+                  number: 8080
+
+          # 7. 풀필먼트 - 공급망관리(SCM)
+          - path: /api/v1/scm
+            pathType: Prefix
+            backend:
+              service:
+                name: scm-service
+                port:
+                  number: 8080

@@ -1,0 +1,24 @@
+# GitHub OAuth 연동 설정
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  url: "https://argocd.cloudyim.store"
+  admin.enabled: "true" # ⭐ admin 로컬 계정 활성화 보장
+  dex.config: |
+    connectors:
+      - type: github
+        id: github
+        name: GitHub
+        config:
+          clientID: Ov23li1mPcJ2KUdi7EuN
+          clientSecret: $argocd-secret:dex.github.clientSecret
+          # Organization 단위 로그인 제한
+          orgs:
+            - name: "5issue"

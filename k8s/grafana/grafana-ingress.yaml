@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: prometheus # 실제 Grafana 네임스페이스
+  annotations:
+    alb.ingress.kubernetes.io/group.name: "main-alb-group"
+    alb.ingress.kubernetes.io/group.order: "20"  # 우선순위 20
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:596601390909:certificate/30f62fc0-4cb0-4201-990f-6ad487fa7240"
+    alb.ingress.kubernetes.io/backend-protocol: "HTTP" # 추가: 백엔드 타깃 통신 프로토콜 명시
+    alb.ingress.kubernetes.io/healthcheck-path: "/api/health"
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTP"
+spec:
+  ingressClassName: alb
+  rules:
+    - host: "grafana.cloudyim.store"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prometheus-grafana # 실제 Grafana Service 이름
+                port:
+                  number: 80

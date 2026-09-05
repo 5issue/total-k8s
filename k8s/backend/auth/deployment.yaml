@@ -1,0 +1,45 @@
+# auth Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      nodeSelector:
+        karpenter.sh/capacity-type: spot
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "topology.kubernetes.io/zone"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: auth-service
+      containers:
+        - name: auth-service
+          image: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-auth:latest
+          ports:
+            - containerPort: 8080
+
+---
+# auth Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: auth-service
+  ports:
+    - port: 8080
+      targetPort: 8080

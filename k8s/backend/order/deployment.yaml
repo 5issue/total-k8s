@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: backend
+  labels:
+    app: order-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      nodeSelector:
+        karpenter.sh/capacity-type: spot
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "topology.kubernetes.io/zone"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: order-service
+      containers:
+        - name: order-service
+          # ECR 리포지토리 이미지 지정
+          image: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-order:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            # 명세서 반영: 토큰 서명 재검증을 위해 내부 auth 서비스의 JWKS 조회
+            - name: AUTH_JWKS_URI
+              value: "http://auth-service.backend.svc.cluster.local:8080/.well-known/jwks.json"
+            # 비동기 통신을 위한 내부 RabbitMQ 주소
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq.backend.svc.cluster.local"
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: backend
+  labels:
+    app: order-service
+spec:
+  type: ClusterIP
+  selector:
+    app: order-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
