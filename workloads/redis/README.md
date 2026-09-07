@@ -1,69 +1,86 @@
 # Redis Kubernetes 구성
 
-이 디렉터리는 단일 replica Redis의 Kubernetes 구성을 관리합니다.
+이 디렉터리는 Backend caching layer로 사용하는 단일 replica Redis의 공통 구성과 AWS EKS overlay를 관리합니다.
 
-공통 Kubernetes 리소스는 `base`에 두며, Namespace와 AWS EKS 환경별 설정은 overlay에서 관리합니다.
+## 현재 base
 
-> **현재 구성 범위**
->
-> 현재 PR은 Redis의 공통 Kubernetes 리소스를 `base`로 구성하는 범위입니다. backend의 현재 연결 환경변수와 서비스 구성을 기준으로 작성했으며, EKS 및 공통 인프라 구성이 확정된 이후 StorageClass, 리소스 할당, Secret 및 보안 설정 등 환경별 항목은 overlay에서 추가·조정합니다.
-
-## 구성
-
-현재 `base`에는 다음 구성을 정의합니다.
+`base`는 환경에 독립적인 다음 리소스를 제공합니다.
 
 * `StatefulSet/redis`, `replicas: 1`
 * image `redis:7.4.11-alpine3.21`
-* backend 연결용 `ClusterIP` Service `redis`, TCP `6379`
-* StatefulSet network identity용 headless Service `redis-headless`
-* `redis-credentials` Secret의 `password`를 사용하는 Redis 인증
-* AOF persistence
+* backend endpoint용 `ClusterIP` Service `redis`, TCP `6379`
+* StatefulSet identity용 headless Service `redis-headless`
+* `redis-credentials` Secret의 `password`를 사용하는 `requirepass` 인증
+* AOF persistence와 `ReadWriteOnce` PVC `1Gi`
 * 인증된 `PING`을 사용하는 startup/readiness/liveness probe
-* replica별 `ReadWriteOnce` PVC `1Gi`
-* `storageClassName` 미지정
+* non-root UID `999`, GID/fsGroup `1000`, `RuntimeDefault` seccomp
+* privilege escalation 금지, Linux capability 전체 제거, read-only root filesystem
 
-`redis` Service는 외부에 노출하지 않으며, `redis-headless` Service는 StatefulSet의 network identity를 위한 리소스로 backend 연결 endpoint로 사용하지 않습니다.
+`redis`와 `redis-headless`는 외부에 노출하지 않습니다. Base는 Namespace, StorageClass, resource request/limit을 지정하지 않습니다.
 
-현재 PVC `1Gi`는 `base`의 초기 구성값이며, 실제 용량과 StorageClass는 EKS 환경 구성이 확정된 뒤 조정합니다.
+## Backend contract
 
-## Backend 연결
+Backend는 Redis를 caching layer로 사용하며 다음 환경변수로 연결 정보를 받습니다.
 
-같은 Namespace에 배포된 backend는 다음 값을 사용합니다.
-
-| Backend variable | Kubernetes 값                           |
-| ---------------- | -------------------------------------- |
-| `REDIS_HOST`     | `redis`                                |
-| `REDIS_PORT`     | `6379`                                 |
+| Backend variable | EKS 값 |
+| --- | --- |
+| `REDIS_HOST` | `redis` |
+| `REDIS_PORT` | `6379` |
 | `REDIS_PASSWORD` | `redis-credentials` Secret의 `password` |
 
-Redis 인증을 위해 같은 Namespace에 `redis-credentials` Secret이 필요합니다.
+Redis 사용 계획은 member, order, payment, product, WMS, SCM이 확정이고 OMS는 조건부입니다. auth는 현재 사용 근거가 없습니다. 실제 cache key, TTL, eviction, logical DB, timeout/pool 및 장애 시 fail-open/fail-closed 동작은 Backend 구현 계약입니다.
 
-평문 password와 실제 Secret manifest는 Git에 저장하지 않습니다. Redis와 backend가 서로 다른 Namespace에 배포되는 경우 Secret 관리 방식은 EKS 구성 시 별도로 결정합니다.
+## EKS overlay
+
+`overlays/eks`는 다음 운영 기본안을 적용합니다.
+
+| 항목 | 값 |
+| --- | --- |
+| Namespace | `backend` |
+| StorageClass | 암호화와 volume expansion을 지원하는 기존 `gp3` |
+| PVC | `5Gi`, `ReadWriteOnce` |
+| Resources | request `100m/256Mi`, limit `500m/1Gi` |
+| Scheduling | on-demand node 선호, hard pinning 없음 |
+| PDB | `minAvailable: 1` |
+| NetworkPolicy | 같은 `backend` Namespace의 Pod에서 TCP 6379만 허용 |
+
+`backend`를 선택하면 기존 Backend Service와 짧은 DNS 이름 `redis`를 사용하고 Secret을 Namespace 사이에 복제하지 않아도 됩니다. `gp3`는 total-infra가 기본 StorageClass로 생성하며 `WaitForFirstConsumer`, EBS encryption, volume expansion을 제공합니다.
+
+On-demand 배치는 선호 조건으로 두어 managed node 또는 Karpenter label 중 하나가 없거나 장애가 발생해도 재스케줄링을 막지 않습니다. PDB는 voluntary disruption 중 유일한 Pod를 보호하지만 Redis를 HA로 만들지는 않으며, drain 시 명시적인 운영 조정이 필요할 수 있습니다.
+
+NetworkPolicy는 member의 최종 Pod label과 OMS의 사용 조건이 아직 없으므로 Namespace 경계까지만 제한합니다. 서비스별 최소 허용 rule은 해당 계약이 확정된 뒤 좁힙니다.
+
+## Security
+
+* 실제 credential이나 Secret manifest는 Git에 저장하지 않습니다.
+* EKS 배포 전에 같은 Namespace에 `redis-credentials/password`가 제공되어야 합니다.
+* Secret delivery와 rotation 도구는 공통 인프라 결정 후 연결합니다.
+* Redis TLS는 현재 확정 요구가 아니므로 활성화하지 않습니다.
+
+## Persistence와 장애 범위
+
+단일 Pod가 삭제되면 StatefulSet이 재생성하고 기존 PVC를 다시 연결합니다. AOF는 process 또는 Pod 재시작 후 데이터 복구 기반을 제공합니다. Sentinel, Redis Cluster, replica failover는 현재 범위에 포함하지 않습니다.
+
+현재 monitoring 준비는 authenticated probe와 Redis 상태 확인 절차까지입니다. 별도 exporter는 monitoring stack과 credential 전달 방식이 확정된 뒤 추가합니다.
+
+장애 확인 절차는 [FAILURE-RUNBOOK.md](FAILURE-RUNBOOK.md)를 따릅니다.
 
 ## Local overlay
 
-`overlays/local`은 선택적인 Kubernetes 로컬 검증용 구성으로 `redis-local` Namespace를 사용합니다.
+`overlays/local`은 선택적인 검증용 `redis-local` Namespace를 사용합니다. Secret은 repository에 포함하지 않습니다. Backend의 Docker Compose는 password가 비어 있을 수 있으므로 EKS 인증 구성을 동일하게 검증하는 환경은 아닙니다.
 
-backend의 로컬 실행 환경은 total-backend/docker-compose.yml을 사용합니다. 해당 Compose 구성은 password가 비어 있을 수 있으므로 Kubernetes의 requirepass 인증 구성을 동일하게 검증하는 환경은 아닙니다.
+## Pending
 
-## 검증
+* Secret delivery와 rotation 방식
+* service별 NetworkPolicy 축소 및 OMS 허용 여부
+* monitoring collector/exporter 연동
+* backup/RPO/RTO와 Redis HA 필요 여부
+* Backend cache key, TTL, eviction 및 장애 처리 계약
 
-다음 명령으로 manifest의 render 결과를 확인할 수 있습니다.
+## Render 검증
 
 ```bash
 kubectl kustomize workloads/redis/base
 kubectl kustomize workloads/redis/overlays/local
+kubectl kustomize workloads/redis/overlays/eks
 ```
-
-실제 Kubernetes 환경이 준비되면 인증된 `PING`, Pod 재생성 후 AOF/PVC 데이터 유지 여부를 추가로 검증합니다.
-
-## EKS 구성 시 결정 사항
-
-* Namespace 및 환경별 overlay 구성
-* EBS CSI driver, StorageClass 및 volume topology
-* PVC 용량과 데이터 보존·복구 정책
-* CPU/memory requests 및 limits
-* Secret 배포 및 rotation 방식
-* Pod/container security 및 NetworkPolicy
-* monitoring, alert 및 PodDisruptionBudget
-* Redis 고가용성 구성(Sentinel, Cluster 등) 필요 여부

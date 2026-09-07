@@ -6,6 +6,7 @@ metadata:
     app.kubernetes.io/name: rabbitmq
     app.kubernetes.io/component: message-broker
 spec:
+  image: rabbitmq:4.3.5
   replicas: 3
   service:
     type: ClusterIP
