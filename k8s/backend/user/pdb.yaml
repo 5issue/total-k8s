@@ -1,0 +1,11 @@
+# user PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: user-service-pdb
+  namespace: backend
+spec:
+  maxUnavailable: 1  # replicas가 1일 때 안전하게 노드 교체가 되도록 설정
+  selector:
+    matchLabels:
+      app: user-service

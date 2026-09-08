@@ -34,8 +34,17 @@ spec:
                 name: auth-service
                 port:
                   number: 8080
+          
+          # 2. 회원 도메인 (auth-service 전담)
+          - path: /api/v1/users
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8080
 
-          # 2. 주문 도메인
+          # 3. 주문 도메인
           - path: /api/v1/orders
             pathType: Prefix
             backend:
@@ -44,7 +53,16 @@ spec:
                 port:
                   number: 8080
 
-          # 3. 결제 도메인
+          # 3-1. 장바구니 도메인 
+          - path: /api/v1/carts
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 8080
+
+          # 4. 결제 도메인
           - path: /api/v1/payments
             pathType: Prefix
             backend:
@@ -53,7 +71,7 @@ spec:
                 port:
                   number: 8080
 
-          # 4. 상품 도메인
+          # 5. 상품 도메인
           - path: /api/v1/products
             pathType: Prefix
             backend:
@@ -62,8 +80,8 @@ spec:
                 port:
                   number: 8080
 
-          # 5. 풀필먼트 - 주문관리(OMS)
-          - path: /api/v1/oms
+          # 6. 풀필먼트 - 주문관리(OMS)
+          - path: /api/v1/admin/oms
             pathType: Prefix
             backend:
               service:
@@ -71,8 +89,8 @@ spec:
                 port:
                   number: 8080
 
-          # 6. 풀필먼트 - 창고관리(WMS)
-          - path: /api/v1/wms
+          # 7. 풀필먼트 - 창고관리(WMS)
+          - path: /api/v1/admin/wms
             pathType: Prefix
             backend:
               service:
@@ -80,8 +98,8 @@ spec:
                 port:
                   number: 8080
 
-          # 7. 풀필먼트 - 공급망관리(SCM)
-          - path: /api/v1/scm
+          # 8. 풀필먼트 - 공급망관리(SCM)
+          - path: /api/v1/admin/scm
             pathType: Prefix
             backend:
               service:
