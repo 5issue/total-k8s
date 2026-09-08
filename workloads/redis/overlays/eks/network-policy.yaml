@@ -10,8 +10,18 @@ spec:
   policyTypes:
     - Ingress
   ingress:
+    # Backend namespace 내부에서 Redis 애플리케이션 포트 접근
     - from:
         - podSelector: {}
       ports:
         - protocol: TCP
           port: 6379
+
+    # Prometheus namespace에서 Exporter metrics 포트 접근
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9121

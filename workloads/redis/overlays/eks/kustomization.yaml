@@ -7,9 +7,19 @@ resources:
   - ../../base
   - network-policy.yaml
   - pdb.yaml
+  - metrics-service.yaml
+  - service-monitor.yaml
+  - prometheus-rule.yaml
 
 patches:
   - path: statefulset-patch.yaml
+    target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: redis
+
+  - path: statefulset-monitoring-patch.yaml
     target:
       group: apps
       version: v1
