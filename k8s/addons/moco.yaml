@@ -4,7 +4,7 @@ kind: Kustomization
 helmCharts:
   - name: moco
     repo: https://cybozu-go.github.io/moco/
-    version: 0.20.0  # TODO: 최신 안정 버전 확인 후 반영
+    version: 0.20.0
     releaseName: moco
     namespace: moco-system
     includeCRDs: true
