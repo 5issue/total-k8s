@@ -25,3 +25,14 @@ spec:
           port: 4369
         - protocol: TCP
           port: 25672
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: rabbitmq-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rabbitmq-cluster-operator
+              app.kubernetes.io/component: rabbitmq-operator
+      ports:
+        - protocol: TCP
+          port: 15671
