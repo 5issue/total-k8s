@@ -24,6 +24,7 @@ spec:
           labelSelector:
             matchLabels:
               app: payment-service
+      serviceAccountName: backend-common-sa
       containers:
         - name: payment-service
           image: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-payment:latest

@@ -24,6 +24,7 @@ spec:
           labelSelector:
             matchLabels:
               app: product-service
+      serviceAccountName: backend-common-sa
       containers:
         - name: product-service
           image: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-product:latest
