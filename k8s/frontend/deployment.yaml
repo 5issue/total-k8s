@@ -27,8 +27,9 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              app: total-client  
-
+              app: total-client 
+               
+      serviceAccountName: total-client-sa
       containers:
         - name: web
           image: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-frontend:latest

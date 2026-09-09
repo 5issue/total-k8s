@@ -24,6 +24,7 @@ spec:
           labelSelector:
             matchLabels:
               app: order-service
+      serviceAccountName: backend-common-sa
       containers:
         - name: order-service
           # ECR 리포지토리 이미지 지정
