@@ -1,0 +1,90 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: redis
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/component: alert-rules
+    release: prometheus
+spec:
+  groups:
+    - name: redis.rules
+      rules:
+        - alert: RedisMetricsTargetDown
+          expr: up{job="redis"} == 0 or absent(up{job="redis"})
+          for: 2m
+          labels:
+            severity: critical
+            service: redis
+          annotations:
+            summary: Redis metrics target is unreachable
+            description: Prometheus가 2분 이상 Redis Exporter의 metrics endpoint를 수집하지 못하고 있습니다.
+
+        - alert: RedisUnavailable
+          expr: redis_up{job="redis"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            service: redis
+          annotations:
+            summary: Redis instance is unavailable
+            description: Redis Exporter에는 접근할 수 있지만 Redis 연결 또는 인증에 실패하고 있습니다.
+
+        - alert: RedisHighMemoryUsage
+          expr: |
+            (
+              max by (namespace, pod, container) (
+                container_memory_working_set_bytes{
+                  namespace="backend",
+                  pod=~"redis-[0-9]+",
+                  container="redis"
+                }
+              )
+              /
+              max by (namespace, pod, container) (
+                kube_pod_container_resource_limits{
+                  namespace="backend",
+                  pod=~"redis-[0-9]+",
+                  container="redis",
+                  resource="memory",
+                  unit="byte"
+                }
+              )
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            service: redis
+          annotations:
+            summary: Redis memory usage is high
+            description: Redis 컨테이너 메모리 사용량이 설정된 limit의 85%를 10분 이상 초과했습니다.
+
+        - alert: RedisEvictionsDetected
+          expr: increase(redis_evicted_keys_total{job="redis"}[5m]) > 0
+          for: 1m
+          labels:
+            severity: warning
+            service: redis
+          annotations:
+            summary: Redis key evictions detected
+            description: 최근 5분 동안 Redis에서 메모리 부족 등에 의한 key eviction이 발생했습니다.
+
+        - alert: RedisRejectedConnections
+          expr: increase(redis_rejected_connections_total{job="redis"}[5m]) > 0
+          for: 1m
+          labels:
+            severity: warning
+            service: redis
+          annotations:
+            summary: Redis connections are being rejected
+            description: 최근 5분 동안 Redis가 새로운 클라이언트 연결을 거부했습니다.
+
+        - alert: RedisAOFWriteFailure
+          expr: redis_aof_last_write_status{job="redis"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            service: redis
+          annotations:
+            summary: Redis AOF write failed
+            description: Redis의 마지막 AOF 쓰기가 실패하여 데이터 영속성이 보장되지 않을 수 있습니다.

@@ -7,9 +7,30 @@ resources:
   - ../../base
   - network-policy.yaml
   - pdb.yaml
+  - metrics-service.yaml
+  - service-monitor.yaml
+  - prometheus-rule.yaml
+
+configMapGenerator:
+  - name: redis-grafana-dashboard
+    files:
+      - redis-overview.json=dashboards/redis-overview.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        app.kubernetes.io/name: redis
+        app.kubernetes.io/component: dashboard
+        grafana_dashboard: "1"
 
 patches:
   - path: statefulset-patch.yaml
+    target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: redis
+
+  - path: statefulset-monitoring-patch.yaml
     target:
       group: apps
       version: v1
