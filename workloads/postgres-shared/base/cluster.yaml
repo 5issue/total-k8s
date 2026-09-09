@@ -1,0 +1,10 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: shared-pg
+  labels:
+    app.kubernetes.io/name: shared-pg
+    app.kubernetes.io/component: database
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.4  # TODO: 팀 표준 버전 재확인

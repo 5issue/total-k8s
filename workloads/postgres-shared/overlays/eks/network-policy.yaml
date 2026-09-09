@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: shared-pg-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: shared-pg
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: product-service
+        - podSelector:
+            matchLabels:
+              app: oms-service
+        - podSelector:
+            matchLabels:
+              app: wms-service
+        - podSelector:
+            matchLabels:
+              app: scm-service
+      ports:
+        - protocol: TCP
+          port: 5432
