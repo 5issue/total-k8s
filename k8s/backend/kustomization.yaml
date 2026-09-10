@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - auth/deployment.yaml
+  - auth/pdb.yaml
+  - oms/deployment.yaml
+  - oms/pdb.yaml
+  - order/deployment.yaml
+  - order/pdb.yaml
+  - payment/deployment.yaml
+  - payment/pdb.yaml
+  - product/deployment.yaml
+  - product/pdb.yaml
+  - scm/deployment.yaml
+  - scm/pdb.yaml
+  - user/deployment.yaml
+  - user/pdb.yaml
+  - user/service.yaml
+  - wms/deployment.yaml
+  - wms/pdb.yaml
+  - serviceAccount.yaml

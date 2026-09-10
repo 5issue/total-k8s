@@ -1,0 +1,29 @@
+# dev 환경을 통째로 관리할 Argo CD Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-stack
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    # 1. 팀의 실제 깃 저장소 주소
+    repoURL: 'https://github.com/5issue/total-k8s.git'
+    # 2. 감시할 Git 브랜치
+    targetRevision: main
+    # 3. 배포 대상 Kustomize 경로
+    path: k8s/dev
+  destination:
+    # 현재 EKS 클러스터 내부
+    server: 'https://kubernetes.default.svc'
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true               # dev 네임스페이스 자동 사전 생성
+      - RespectIgnoreDifferences=true
+      - ApplyOutOfSyncOnly=true
