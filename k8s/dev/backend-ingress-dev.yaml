@@ -1,1 +1,109 @@
-# DAST 점검용 ALB Ingress
+# DAST 점검용 ALB IngressapiVersion: networking.k8s.io/v1
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: total-backend-ingress-dev
+  namespace: dev
+  annotations:
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:596601390909:certificate/30f62fc0-4cb0-4201-990f-6ad487fa7240"
+    alb.ingress.kubernetes.io/group.name: "main-alb-group"
+    alb.ingress.kubernetes.io/group.order: "21"  # dev 프론트(30)보다 먼저 /api/* 가로채도록 우선순위 21 지정
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTP"
+    alb.ingress.kubernetes.io/healthcheck-port: "traffic-port"
+    alb.ingress.kubernetes.io/success-codes: "200-399"
+    alb.ingress.kubernetes.io/load-balancer-attributes: >-
+      access_logs.s3.enabled=true,
+      access_logs.s3.bucket=kurly-security-logs-ap-northeast-2,
+      access_logs.s3.prefix=alb-logs,
+      deletion_protection.enabled=false,
+      idle_timeout.timeout_seconds=60
+spec:
+  ingressClassName: alb
+  rules:
+    - host: "dev.cloudyim.store"
+      http:
+        paths:
+          # 1. 인증/인가 도메인
+          - path: /api/v1/auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 8080
+          
+          # 2. 회원 도메인
+          - path: /api/v1/users
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8080
+
+          # 3. 주문 도메인
+          - path: /api/v1/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 8080
+
+          # 3-1. 장바구니 도메인 
+          - path: /api/v1/carts
+            pathType: Prefix
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 8080
+
+          # 4. 결제 도메인
+          - path: /api/v1/payments
+            pathType: Prefix
+            backend:
+              service:
+                name: payment-service
+                port:
+                  number: 8080
+
+          # 5. 상품 도메인
+          - path: /api/v1/products
+            pathType: Prefix
+            backend:
+              service:
+                name: product-service
+                port:
+                  number: 8080
+
+          # 6. 풀필먼트 - OMS
+          - path: /api/v1/admin/oms
+            pathType: Prefix
+            backend:
+              service:
+                name: oms-service
+                port:
+                  number: 8080
+
+          # 7. 풀필먼트 - WMS
+          - path: /api/v1/admin/wms
+            pathType: Prefix
+            backend:
+              service:
+                name: wms-service
+                port:
+                  number: 8080
+
+          # 8. 풀필먼트 - SCM
+          - path: /api/v1/admin/scm
+            pathType: Prefix
+            backend:
+              service:
+                name: scm-service
+                port:
+                  number: 8080
