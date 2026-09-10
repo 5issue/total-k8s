@@ -17,8 +17,13 @@ metadata:
     alb.ingress.kubernetes.io/healthcheck-protocol: "HTTP"
     alb.ingress.kubernetes.io/healthcheck-port: "traffic-port"
     alb.ingress.kubernetes.io/success-codes: "200-399"
-    # ALB에게 S3로 액세스 로그를 전송하도록 명령하는 어노테이션
-    alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=kurly-security-logs-ap-northeast-2,access_logs.s3.prefix=alb-logs
+    # 엑세스 로그 + 삭제 방지 비활성화 + 유휴 제한시간(예: 60초)
+    alb.ingress.kubernetes.io/load-balancer-attributes: >-
+      access_logs.s3.enabled=true,
+      access_logs.s3.bucket=kurly-security-logs-ap-northeast-2,
+      access_logs.s3.prefix=alb-logs,
+      deletion_protection.enabled=false,
+      idle_timeout.timeout_seconds=60
 spec:
   ingressClassName: alb
   rules:

@@ -14,8 +14,13 @@ metadata:
     alb.ingress.kubernetes.io/backend-protocol: "HTTP" # 추가: 백엔드 타깃 통신 프로토콜 명시
     alb.ingress.kubernetes.io/healthcheck-path: "/api/health"
     alb.ingress.kubernetes.io/healthcheck-protocol: "HTTP"
-    # ALB에게 S3로 액세스 로그를 전송하도록 명령하는 어노테이션
-    alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=kurly-security-logs-ap-northeast-2,access_logs.s3.prefix=alb-logs
+    # ALB 공통 속성: 엑세스 로그 + 삭제 방지(9/21 전 false) + Idle Timeout(60초)
+    alb.ingress.kubernetes.io/load-balancer-attributes: >-
+      access_logs.s3.enabled=true,
+      access_logs.s3.bucket=kurly-security-logs-ap-northeast-2,
+      access_logs.s3.prefix=alb-logs,
+      deletion_protection.enabled=false,
+      idle_timeout.timeout_seconds=60
 spec:
   ingressClassName: alb
   rules:
