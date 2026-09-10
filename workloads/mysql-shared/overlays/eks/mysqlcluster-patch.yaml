@@ -1,0 +1,61 @@
+- op: add
+  path: /spec/podTemplate/spec/topologySpreadConstraints
+  value:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: shared-mysql
+- op: add
+  path: /spec/podTemplate/spec/affinity
+  value:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: karpenter.sh/capacity-type
+                operator: In
+                values: ["on-demand"]
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: eks.amazonaws.com/capacityType
+                operator: In
+                values: ["ON_DEMAND"]
+- op: add
+  path: /spec/podTemplate/spec/containers/0/resources
+  value:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1.5Gi
+- op: add
+  path: /spec/volumeClaimTemplates
+  value:
+    - metadata:
+        name: mysql-data
+        labels:
+          app.kubernetes.io/name: shared-mysql
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: gp3
+        resources:
+          requests:
+            storage: 10Gi
+  path: /spec/podTemplate/spec/securityContext
+  value:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+- op: add
+  path: /spec/podTemplate/spec/containers/0/securityContext
+  value:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+    readOnlyRootFilesystem: false
+    runAsNonRoot: true

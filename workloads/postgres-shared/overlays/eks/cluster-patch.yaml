@@ -1,0 +1,58 @@
+- op: add
+  path: /spec/affinity
+  value:
+    podAntiAffinityType: required
+    topologyKey: topology.kubernetes.io/zone
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: karpenter.sh/capacity-type
+                operator: In
+                values: ["on-demand"]
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: eks.amazonaws.com/capacityType
+                operator: In
+                values: ["ON_DEMAND"]
+- op: add
+  path: /spec/resources
+  value:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1.5Gi
+- op: add
+  path: /spec/storage
+  value:
+    storageClass: gp3
+    size: 10Gi
+- op: add
+  path: /spec/monitoring
+  value:
+    enablePodMonitor: true
+- op: add
+  path: /spec/postgresql
+  value:
+    parameters:
+      pgaudit.log: "all, -misc"
+      pgaudit.log_catalog: "off"
+      pgaudit.log_parameter: "on"
+      pgaudit.log_relation: "on"
+- op: add
+  path: /spec/backup
+  value:
+    barmanObjectStore:
+      destinationPath: "s3://kurly-db-backup/shared-pg"
+      s3Credentials:
+        inheritFromIAMRole: true
+- op: add
+  path: /spec/serviceAccountTemplate
+  value:
+    metadata:
+      annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::596601390909:role/cnpg-s3-backup-role"

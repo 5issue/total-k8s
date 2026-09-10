@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: backend
+
+resources:
+  - ../../base
+  - network-policy.yaml
+  - pdb.yaml
+  - rbac-secret-access.yaml
+
+patches:
+  - path: mysqlcluster-patch.yaml
+    target:
+      group: moco.cybozu.com
+      version: v1beta2
+      kind: MySQLCluster
+      name: shared-mysql
