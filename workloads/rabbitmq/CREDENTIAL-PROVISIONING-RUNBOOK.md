@@ -122,7 +122,7 @@ shell tracing
 
 Provisioning Job은 ServiceAccount token을 자동 mount하지 않으며 Kubernetes Secret API를 조회하기 위한 별도 RBAC 권한을 사용하지 않습니다.
 
-Provisioning Job은 Argo CD PostSync Hook으로 사용할 수 있도록 정의되어 있습니다. 실제 GitOps Application 등록 및 실행 방식은 배포/GitOps 담당 영역에서 결정합니다.
+Provisioning Job은 RabbitMQ Cluster와 필요한 Secret이 준비된 이후 실행해야 합니다. 실제 실행 및 GitOps 연계 방식은 배포/GitOps 구성에서 결정합니다.
 
 ---
 
@@ -144,11 +144,11 @@ Backend Application
 
 기본 갱신 절차는 다음과 같습니다.
 
-AWS Secrets Manager에서 새로운 Application password version을 준비합니다.
-동일 version을 기준으로 messaging과 backend의 rabbitmq-app-credentials를 갱신합니다.
-Provisioning Job을 실행하여 RabbitMQ의 total-backend password를 갱신하고 상태를 검증합니다.
-Backend가 새로운 credential을 사용하도록 재연결합니다.
-AMQPS 연결, 인증 및 publish/consume 동작을 확인합니다.
+1. AWS Secrets Manager에서 새로운 Application password version을 준비합니다.
+2. 동일 version을 기준으로 `messaging/rabbitmq-app-credentials`와 `backend/rabbitmq-app-credentials`를 갱신합니다.
+3. Provisioning Job을 실행하여 RabbitMQ의 `total-backend` password를 갱신하고 상태를 검증합니다.
+4. Backend가 새로운 credential을 사용하도록 재연결합니다.
+5. AMQPS 연결, 인증 및 publish/consume 동작을 확인합니다.
 
 Kubernetes Secret과 RabbitMQ 내부 credential이 서로 다른 상태가 되지 않도록 동일 Secrets Manager version을 기준으로 갱신합니다.
 
@@ -168,12 +168,12 @@ Kubernetes Secret 또는 RabbitMQ Application Identity를 복구해야 하는 �
 
 복구 시 다음 항목을 확인합니다.
 
-AWS Secrets Manager의 현재 Application credential version을 확인합니다.
-동일 credential을 messaging/rabbitmq-app-credentials와 backend/rabbitmq-app-credentials에 제공합니다.
-RabbitMQ TLS 및 Management API 접근이 정상인지 확인합니다.
-Provisioning Job으로 total-prod vhost, total-backend user 및 permission을 현재 계약 상태로 수렴시킵니다.
-RabbitMQ에서 user/vhost/permission 상태를 확인합니다.
-Backend와 연계하여 AMQPS 인증 및 publish/consume을 확인합니다.
+1. AWS Secrets Manager의 현재 Application credential version을 확인합니다.
+2. 동일 credential을 `messaging/rabbitmq-app-credentials`와 `backend/rabbitmq-app-credentials`에 제공합니다.
+3. RabbitMQ TLS 및 Management API 접근이 정상인지 확인합니다.
+4. Provisioning Job으로 `total-prod` vhost, `total-backend` user 및 permission을 현재 계약 상태로 수렴시킵니다.
+5. RabbitMQ에서 user/vhost/permission 상태를 확인합니다.
+6. Backend와 연계하여 AMQPS 인증 및 publish/consume을 확인합니다.
 
 기존 RabbitMQ PVC를 복구하는 경우 rabbitmq-default-user Secret을 임의로 삭제하거나 재생성하지 않습니다.
 
@@ -189,20 +189,22 @@ Queue type, Queue durability, message replication, DLQ/retry 등 Application Mes
 
 Backend는 다음 연결 정보를 사용합니다.
 
-환경변수	값
-RABBITMQ_HOST	rabbitmq.messaging.svc.cluster.local
-RABBITMQ_PORT	5671
-RABBITMQ_VHOST	total-prod
-RABBITMQ_USERNAME	backend/rabbitmq-app-credentials의 username
-RABBITMQ_PASSWORD	backend/rabbitmq-app-credentials의 password
+| 환경변수 | 값 |
+| --- | --- |
+| `RABBITMQ_HOST` | `rabbitmq.messaging.svc.cluster.local` |
+| `RABBITMQ_PORT` | `5671` |
+| `RABBITMQ_VHOST` | `total-prod` |
+| `RABBITMQ_USERNAME` | `backend/rabbitmq-app-credentials`의 `username` |
+| `RABBITMQ_PASSWORD` | `backend/rabbitmq-app-credentials`의 `password` |
 
 CA trust는 다음 기준을 사용합니다.
 
-항목	값
-Secret	backend/rabbitmq-ca
-Key	ca.crt
-Mount Path	/etc/rabbitmq/tls/ca.crt
-Trust 방식	Spring PEM SSL Bundle
+| 항목 | 값 |
+| --- | --- |
+| Secret | `backend/rabbitmq-ca` |
+| Key | `ca.crt` |
+| Mount Path | `/etc/rabbitmq/tls/ca.crt` |
+| Trust 방식 | Spring PEM SSL Bundle |
 
 Backend는 ca.crt를 read-only로 mount하여 사용합니다.
 

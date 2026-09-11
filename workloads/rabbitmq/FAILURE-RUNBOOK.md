@@ -58,4 +58,3 @@ Provisioning Job은 PUT 기반으로 vhost/user/permission을 수렴하며 기�
 Application credential 갱신 또는 Provisioning Job 복구를 위해 rabbitmq-default-user Secret을 삭제하지 않습니다. 기존 PVC를 사용한 복구에서는 Kubernetes bootstrap Secret과 RabbitMQ 내부 credential의 정합성을 먼저 확인합니다.
 
 Application credential 구성·갱신·복구 기준은 CREDENTIAL-PROVISIONING-RUNBOOK.md를 따릅니다.
-
