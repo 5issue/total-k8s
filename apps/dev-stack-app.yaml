@@ -23,7 +23,6 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true               # dev 네임스페이스 자동 사전 생성
+    syncOptions:               
       - RespectIgnoreDifferences=true
       - ApplyOutOfSyncOnly=true

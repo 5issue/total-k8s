@@ -1,11 +1,36 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# 모든 파드/서비스/인그레스를 dev 네임스페이스로 배포
 namespace: dev
 
+# 운영용 매니페스트 그대로 재사용
 resources:
-  - 00-namespace.yaml
   - ../frontend
   - ../backend
-  - frontend-ingress-dev.yaml
-  - backend-ingress-dev.yaml
+
+# 운영 Ingress를 지우지 않고, Host와 순서(order)만 dev용으로 덮어쓰기!
+patches:
+  # 백엔드 Ingress 패치
+  - target:
+      kind: Ingress
+      name: total-backend-ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: dev.cloudyim.store
+      - op: replace
+        path: /metadata/annotations/alb.ingress.kubernetes.io~1group.order
+        value: "21"
+
+  # 프론트엔드 Ingress 패치
+  - target:
+      kind: Ingress
+      name: total-client-ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: dev.cloudyim.store
+      - op: replace
+        path: /metadata/annotations/alb.ingress.kubernetes.io~1group.order
+        value: "30"
