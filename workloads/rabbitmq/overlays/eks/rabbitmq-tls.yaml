@@ -1,0 +1,71 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: rabbitmq-selfsigned
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rabbitmq-ca
+spec:
+  secretName: rabbitmq-ca-signing
+  commonName: rabbitmq-ca
+  isCA: true
+  duration: 43800h
+  renewal:
+    policy: Disabled
+  privateKey:
+    algorithm: RSA
+    size: 4096
+    rotationPolicy: Never
+  usages:
+    - cert sign
+    - crl sign
+  issuerRef:
+    name: rabbitmq-selfsigned
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: rabbitmq-ca
+spec:
+  ca:
+    secretName: rabbitmq-ca-signing
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rabbitmq-server
+spec:
+  secretName: rabbitmq-server-tls
+  duration: 2160h
+  renewBefore: 360h
+  renewal:
+    policy: RenewBefore
+  privateKey:
+    algorithm: RSA
+    size: 2048
+    rotationPolicy: Always
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+  dnsNames:
+    - rabbitmq.messaging.svc
+    - rabbitmq.messaging.svc.cluster.local
+    - "*.rabbitmq-nodes.messaging.svc"
+    - "*.rabbitmq-nodes.messaging.svc.cluster.local"
+    - rabbitmq-server-0.rabbitmq-nodes.messaging.svc
+    - rabbitmq-server-0.rabbitmq-nodes.messaging.svc.cluster.local
+    - rabbitmq-server-1.rabbitmq-nodes.messaging.svc
+    - rabbitmq-server-1.rabbitmq-nodes.messaging.svc.cluster.local
+    - rabbitmq-server-2.rabbitmq-nodes.messaging.svc
+    - rabbitmq-server-2.rabbitmq-nodes.messaging.svc.cluster.local
+  issuerRef:
+    name: rabbitmq-ca
+    kind: Issuer
+    group: cert-manager.io

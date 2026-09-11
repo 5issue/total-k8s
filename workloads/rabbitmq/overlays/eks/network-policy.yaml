@@ -11,7 +11,9 @@ spec:
     - Ingress
   ingress:
     - from:
-        - podSelector: {}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: backend
       ports:
         - protocol: TCP
           port: 5671
@@ -33,6 +35,14 @@ spec:
             matchLabels:
               app.kubernetes.io/name: rabbitmq-cluster-operator
               app.kubernetes.io/component: rabbitmq-operator
+      ports:
+        - protocol: TCP
+          port: 15671
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: rabbitmq-provisioner
+              app.kubernetes.io/component: credential-provisioning
       ports:
         - protocol: TCP
           port: 15671
