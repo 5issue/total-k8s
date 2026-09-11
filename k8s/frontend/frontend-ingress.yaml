@@ -37,3 +37,13 @@ spec:
                 name: total-client
                 port:
                   number: 80
+    - host: "www.cloudyim.store"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: total-client
+                port:
+                  number: 80
