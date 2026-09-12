@@ -38,9 +38,9 @@ spec:
               value: "http://auth-service.backend.svc.cluster.local:8080/.well-known/jwks.json"
             # 비동기 통신을 위한 내부 RabbitMQ 주소
             - name: SPRING_RABBITMQ_HOST
-              value: "rabbitmq.backend.svc.cluster.local"
+              value: "rabbitmq.messaging.svc.cluster.local"
             - name: SPRING_RABBITMQ_PORT
-              value: "5672"
+              value: "5671"
           resources:
             requests:
               cpu: "250m"
