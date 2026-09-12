@@ -1,0 +1,28 @@
+
+
+# enabled 가 true 일때만 NetworkPolicy 생성, 추후 특정 서비스만  networkPolicy 끄고 싶으면 enabled false로 변경 
+# ex: order-service만 networkPolicy 끄고 싶으면 values/order.yaml에 networkPolicy.enabled: false 추가
+# 현재 미 추가 상태 
+{{- if .Values.networkPolicy.enabled }}      {{/* enabled true일 때만 생성 */}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.serviceName }}-netpol      # 예: auth-service-netpol
+  namespace: backend
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.serviceName }}          # 이 정책을 적용할 대상 파드
+  policyTypes:
+    - Ingress                                 # 들어오는 트래픽만 제어
+  ingress:
+    - from:
+        {{- range .Values.networkPolicy.allowFromNamespaces }}   {{/* 허용 목록 반복 */}}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ . }}   # 예: ingress-nginx, backend
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.containerPort }}   # 이 포트로만 진입 허용 (예: 8081)
+{{- end }}

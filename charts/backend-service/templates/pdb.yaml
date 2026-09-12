@@ -1,0 +1,12 @@
+# 최소 몇개 pod 유지 규칙
+# templates/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.serviceName }}-pdb      # 예: oms-service-pdb
+  namespace: backend
+spec:
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}   # minAvailable에서 변경
+  selector:
+    matchLabels:
+      app: {{ .Values.serviceName }}       # 이 라벨 붙은 파드를 대상으로

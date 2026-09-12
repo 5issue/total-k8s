@@ -1,0 +1,60 @@
+# 서비스 식별 (서비스별로 나중에 덮어씀)
+serviceName: PLACEHOLDER      # 예: auth-service (values/auth.yaml에서 채움)
+replicaCount: 1               # 파드 개수 (기본 1개)
+
+# 컨테이너 이미지 (ECR 창고 주소)
+image:
+  registry: "596601390909.dkr.ecr.ap-northeast-2.amazonaws.com"  # 우리 ECR 주소
+  repository: PLACEHOLDER      # 예: kurly-auth (서비스별로 채움)
+  tag: "latest"               # 이미지 태그
+  pullPolicy: Always          # 항상 최신 이미지 받기
+
+# 포트 (서비스별로 다름, 나중에 덮어씀)
+containerPort: 8080           # 예: auth는 8081 (values/auth.yaml에서 채움)
+
+# 서비스(고정 진입점) 설정
+service:
+  type: ClusterIP             # 클러스터 내부 전용
+  port: 8080                  # 서비스 포트 (containerPort와 맞춤)
+
+# 리소스 (CPU·메모리 최소/최대)
+resources:
+  requests:                   # 최소 보장
+    cpu: "100m"               # 0.1 CPU
+    memory: "256Mi"
+  limits:                     # 최대 상한
+    cpu: "500m"               # 0.5 CPU
+    memory: "512Mi"
+
+# RabbitMQ (메시징) — ★ 5671 + SSL 확정 반영
+rabbitmq:
+  host: "rabbitmq.rabbitmq.svc.cluster.local"  # 클러스터 내부 주소
+  port: 5671                  # ★ TLS 전용 포트 (5672 아님)
+  sslEnabled: true            # ★ SSL 켜기
+
+
+  # 헬스체크 (건강검진) 설정
+health:
+  path: /actuator/health   # Spring Boot 기본 건강검진 주소
+  livenessDelay: 30        # 컨테이너 뜨고 30초 뒤부터 생존검사 시작 (앱 뜰 시간 줌)
+  readinessDelay: 10       # 10초 뒤부터 준비검사 시작
+
+# PDB (파드 중단 예산) 설정
+pdb:
+  maxUnavailable: 1     # 최대 1개까지만 동시에 내려라
+
+
+database:
+  type: mysql
+  host: shared-mysql-primary.backend.svc.cluster.local   # TODO[1] 재혁님 확인 (실제 svc명)
+  port: 3306
+  name: auth_db                                          # TODO[2] order는 DB이름 미확인
+  secretName: TODO-mysql-secret                          # TODO[3] MySQL Secret 이름 미정
+
+
+# NetworkPolicy (네트워크 방화벽) 설정
+networkPolicy:
+  enabled: true
+  allowFromNamespaces:      # 이 네임스페이스에서 오는 트래픽만 허용
+    - ingress-nginx         # 외부 진입 통로
+    - backend               # 백엔드 서비스끼리
