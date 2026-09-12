@@ -1,3 +1,4 @@
+# 기존 yaml 파일 배포
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
