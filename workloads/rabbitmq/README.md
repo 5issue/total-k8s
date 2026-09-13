@@ -77,7 +77,7 @@ RabbitMQ Application Identity는 다음 계약을 사용합니다.
 | Write     | `.*`            |
 | Read      | `.*`            |
 
-Application credential의 Source of Truth는 AWS Secrets Manager이며 동일 credential을 다음 Kubernetes Secret으로 제공합니다.
+Application credential의 Source of Truth는 AWS Secrets Manager이며, 동일한 credential version을 기준으로 다음 Kubernetes Secret을 제공합니다.
 
 | Secret                               | 소비자                               |
 | ------------------------------------ | --------------------------------- |
