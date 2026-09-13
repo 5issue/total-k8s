@@ -1,12 +1,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: backend
+namespace: messaging
 
 resources:
   - ../../base
+  - namespace.yaml
+  - rabbitmq-tls.yaml
   - network-policy.yaml
   - pdb.yaml
+  - provisioning-service-account.yaml
+  - provisioning-script.yaml
 
 patches:
   - path: rabbitmq-cluster-patch.yaml

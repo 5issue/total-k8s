@@ -15,6 +15,6 @@
 ## Workloads
 
 * [Redis](workloads/redis/README.md): 단일 replica Redis 구성
-* [RabbitMQ](workloads/rabbitmq/README.md): RabbitMQ Cluster Operator 기반 3-node cluster 구성
+* [RabbitMQ](workloads/rabbitmq/README.md): RabbitMQ Cluster Operator 기반 3-node cluster, EKS TLS/접근 인증 구성
 
 최종 배포 대상은 AWS EKS이며, 환경별 설정은 각 workload의 overlay에서 관리합니다.

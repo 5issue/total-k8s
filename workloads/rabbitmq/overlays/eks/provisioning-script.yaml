@@ -1,0 +1,173 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-provisioning-script
+  labels:
+    app.kubernetes.io/name: rabbitmq-provisioner
+    app.kubernetes.io/component: credential-provisioning
+data:
+  provision.py: |
+    import base64
+    import json
+    import os
+    import ssl
+    import sys
+    import time
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+
+    MANAGEMENT_URL = "https://rabbitmq.messaging.svc.cluster.local:15671"
+    APPLICATION_USERNAME = "total-backend"
+    APPLICATION_VHOST = "total-prod"
+    READINESS_TIMEOUT_SECONDS = 600
+    RETRY_SECONDS = 5
+
+
+    def read_secret(path, label):
+        try:
+            with open(path, "r", encoding="utf-8") as secret_file:
+                value = secret_file.read()
+        except OSError as error:
+            raise RuntimeError(f"cannot read {label}") from error
+        if not value or "\n" in value or "\r" in value:
+            raise RuntimeError(f"{label} must be a non-empty single-line value")
+        return value
+
+
+    def api_request(method, resource, basic_token, tls_context, payload=None, timeout=10):
+        body = None
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Basic {basic_token}",
+        }
+        if payload is not None:
+            body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+            headers["Content-Type"] = "application/json"
+        request = urllib.request.Request(
+            f"{MANAGEMENT_URL}{resource}", data=body, headers=headers, method=method
+        )
+        try:
+            with urllib.request.urlopen(
+                request, context=tls_context, timeout=timeout
+            ) as response:
+                response_body = response.read()
+                if not response_body:
+                    return None
+                return json.loads(response_body)
+        except urllib.error.HTTPError as error:
+            raise RuntimeError(
+                f"{method} {resource} failed with HTTP status {error.code}"
+            ) from None
+        except (OSError, ValueError, urllib.error.URLError):
+            raise RuntimeError(f"{method} {resource} failed") from None
+
+
+    def main():
+        bootstrap_username = read_secret(
+            "/var/run/rabbitmq-secrets/bootstrap/username", "bootstrap username"
+        )
+        bootstrap_password = read_secret(
+            "/var/run/rabbitmq-secrets/bootstrap/password", "bootstrap password"
+        )
+        application_username = read_secret(
+            "/var/run/rabbitmq-secrets/application/username", "application username"
+        )
+        application_password = read_secret(
+            "/var/run/rabbitmq-secrets/application/password", "application password"
+        )
+
+        if application_username != APPLICATION_USERNAME:
+            raise RuntimeError(
+                "application username does not match the infrastructure contract"
+            )
+
+        tls_context = ssl.create_default_context(
+            cafile="/var/run/rabbitmq-secrets/ca/ca.crt"
+        )
+        basic_token = base64.b64encode(
+            f"{bootstrap_username}:{bootstrap_password}".encode("utf-8")
+        ).decode("ascii")
+
+        deadline = time.monotonic() + READINESS_TIMEOUT_SECONDS
+        while True:
+            try:
+                api_request(
+                    "GET", "/api/overview", basic_token, tls_context, timeout=5
+                )
+                print("RabbitMQ HTTPS Management API is ready")
+                break
+            except RuntimeError:
+                if time.monotonic() >= deadline:
+                    raise RuntimeError(
+                        "GET /api/overview did not become ready before timeout"
+                    ) from None
+                time.sleep(RETRY_SECONDS)
+
+        encoded_vhost = urllib.parse.quote(APPLICATION_VHOST, safe="")
+        encoded_username = urllib.parse.quote(APPLICATION_USERNAME, safe="")
+
+        api_request("PUT", f"/api/vhosts/{encoded_vhost}", basic_token, tls_context, {})
+        print(f"Reconciled vhost {APPLICATION_VHOST}")
+
+        api_request(
+            "PUT",
+            f"/api/users/{encoded_username}",
+            basic_token,
+            tls_context,
+            {"password": application_password, "tags": ""},
+        )
+        print(
+            f"Reconciled application user {APPLICATION_USERNAME} without management tags"
+        )
+
+        expected_permissions = {"configure": ".*", "write": ".*", "read": ".*"}
+        api_request(
+            "PUT",
+            f"/api/permissions/{encoded_vhost}/{encoded_username}",
+            basic_token,
+            tls_context,
+            expected_permissions,
+        )
+        print(
+            f"Reconciled permissions for {APPLICATION_USERNAME} in {APPLICATION_VHOST}"
+        )
+
+        vhost = api_request(
+            "GET", f"/api/vhosts/{encoded_vhost}", basic_token, tls_context
+        )
+        user = api_request(
+            "GET", f"/api/users/{encoded_username}", basic_token, tls_context
+        )
+        permissions = api_request(
+            "GET",
+            f"/api/permissions/{encoded_vhost}/{encoded_username}",
+            basic_token,
+            tls_context,
+        )
+
+        if not isinstance(vhost, dict) or vhost.get("name") != APPLICATION_VHOST:
+            raise RuntimeError("vhost verification failed")
+        if not isinstance(user, dict) or user.get("name") != APPLICATION_USERNAME:
+            raise RuntimeError("application user verification failed")
+        if user.get("tags") not in (None, "", []):
+            raise RuntimeError("application user unexpectedly has management tags")
+        if not isinstance(permissions, dict) or any(
+            permissions.get(key) != value
+            for key, value in expected_permissions.items()
+        ):
+            raise RuntimeError("application permission verification failed")
+
+        print("RabbitMQ application identity provisioning verified")
+
+
+    if __name__ == "__main__":
+        try:
+            main()
+        except RuntimeError as error:
+            print(f"RabbitMQ provisioning failed: {error}", file=sys.stderr)
+            sys.exit(1)
+        except Exception:
+            print("RabbitMQ provisioning failed unexpectedly", file=sys.stderr)
+            sys.exit(1)
