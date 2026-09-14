@@ -1,0 +1,7 @@
+- op: add
+  path: /spec/rabbitmq
+  value:
+    additionalPlugins:
+      - rabbitmq_prometheus
+    additionalConfig: |
+      prometheus.tcp.port = 15692

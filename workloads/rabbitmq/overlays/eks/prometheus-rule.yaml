@@ -1,0 +1,71 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: rabbitmq
+  labels:
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/component: alert-rules
+    release: prometheus
+spec:
+  groups:
+    - name: rabbitmq.rules
+      rules:
+        - alert: RabbitMQMetricsTargetDown
+          expr: up{job="rabbitmq"} == 0 or absent(up{job="rabbitmq"})
+          for: 2m
+          labels:
+            severity: critical
+            service: rabbitmq
+          annotations:
+            summary: RabbitMQ metrics target is unreachable
+            description: Prometheus가 2분 이상 RabbitMQ metrics endpoint를 수집하지 못하고 있습니다.
+
+        - alert: RabbitMQMemoryAlarm
+          expr: rabbitmq_alarms_memory_used_watermark{job="rabbitmq"} > 0
+          for: 2m
+          labels:
+            severity: critical
+            service: rabbitmq
+          annotations:
+            summary: RabbitMQ memory alarm is active
+            description: RabbitMQ 노드가 메모리 임계값을 초과하여 publisher 흐름을 제한하고 있습니다.
+
+        - alert: RabbitMQDiskAlarm
+          expr: rabbitmq_alarms_free_disk_space_watermark{job="rabbitmq"} > 0
+          for: 2m
+          labels:
+            severity: critical
+            service: rabbitmq
+          annotations:
+            summary: RabbitMQ disk alarm is active
+            description: RabbitMQ 노드의 사용 가능한 디스크 공간이 설정된 임계값 아래로 감소했습니다.
+
+        - alert: RabbitMQFileDescriptorAlarm
+          expr: rabbitmq_alarms_file_descriptor_limit{job="rabbitmq"} > 0
+          for: 2m
+          labels:
+            severity: critical
+            service: rabbitmq
+          annotations:
+            summary: RabbitMQ file descriptor alarm is active
+            description: RabbitMQ 노드가 사용 가능한 파일 디스크립터 한계에 도달했습니다.
+
+        - alert: RabbitMQQueueBacklog
+          expr: sum(rabbitmq_queue_messages_ready{job="rabbitmq"}) > 1000
+          for: 10m
+          labels:
+            severity: warning
+            service: rabbitmq
+          annotations:
+            summary: RabbitMQ queue backlog is increasing
+            description: 처리되지 않고 대기 중인 메시지가 10분 이상 1,000개를 초과했습니다.
+
+        - alert: RabbitMQHighUnackedMessages
+          expr: sum(rabbitmq_queue_messages_unacked{job="rabbitmq"}) > 500
+          for: 10m
+          labels:
+            severity: warning
+            service: rabbitmq
+          annotations:
+            summary: RabbitMQ unacknowledged messages are high
+            description: Consumer가 가져간 뒤 ACK를 완료하지 않은 메시지가 10분 이상 500개를 초과했습니다.
