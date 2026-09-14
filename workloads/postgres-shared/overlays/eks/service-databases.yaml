@@ -1,0 +1,19 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: shared-pg-wms-db
+spec:
+  cluster:
+    name: shared-pg
+  name: wms_db
+  owner: wms_service
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: shared-pg-scm-db
+spec:
+  cluster:
+    name: shared-pg
+  name: scm_db
+  owner: scm_service

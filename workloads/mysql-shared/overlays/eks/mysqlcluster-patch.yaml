@@ -1,4 +1,7 @@
 - op: add
+  path: /spec/mysqlConfigMapName
+  value: shared-mysql-password-policy
+- op: add
   path: /spec/podTemplate/spec/topologySpreadConstraints
   value:
     - maxSkew: 1
@@ -46,6 +49,7 @@
         resources:
           requests:
             storage: 10Gi
+- op: add
   path: /spec/podTemplate/spec/securityContext
   value:
     runAsNonRoot: true

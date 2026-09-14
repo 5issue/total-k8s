@@ -15,9 +15,6 @@ spec:
               app: product-service
         - podSelector:
             matchLabels:
-              app: oms-service
-        - podSelector:
-            matchLabels:
               app: wms-service
         - podSelector:
             matchLabels:

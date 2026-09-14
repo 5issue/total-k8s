@@ -7,6 +7,8 @@ resources:
   - ../../base
   - network-policy.yaml
   - pdb.yaml
+  - password-policy-configmap.yaml   # D-03/D-05
+  - service-accounts-job.yaml
   - rbac-secret-access.yaml
 
 patches:

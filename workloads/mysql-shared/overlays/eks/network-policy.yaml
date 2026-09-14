@@ -22,6 +22,9 @@ spec:
         - podSelector:
             matchLabels:
               app: member-service
+        - podSelector:
+            matchLabels:
+              app: oms-service        
       ports:
         - protocol: TCP
           port: 3306
