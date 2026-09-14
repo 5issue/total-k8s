@@ -46,3 +46,10 @@ spec:
       ports:
         - protocol: TCP
           port: 15671
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: prometheus
+      ports:
+        - protocol: TCP
+          port: 15692
