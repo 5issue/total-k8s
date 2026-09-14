@@ -1,4 +1,19 @@
 - op: add
+  path: /spec/postgresql
+  value:
+    shared_preload_libraries:
+      - pgaudit
+      - passwordcheck
+      - credcheck
+    parameters:
+      pgaudit.log: "all, -misc"
+      pgaudit.log_catalog: "off"
+      pgaudit.log_parameter: "on"
+      pgaudit.log_relation: "on"
+      credcheck.password_min_length: "12"
+      credcheck.password_reuse_history: "3"
+      credcheck.password_valid_max: "90"
+- op: add
   path: /spec/affinity
   value:
     podAntiAffinityType: required
@@ -36,14 +51,6 @@
   value:
     enablePodMonitor: true
 - op: add
-  path: /spec/postgresql
-  value:
-    parameters:
-      pgaudit.log: "all, -misc"
-      pgaudit.log_catalog: "off"
-      pgaudit.log_parameter: "on"
-      pgaudit.log_relation: "on"
-- op: add
   path: /spec/backup
   value:
     barmanObjectStore:
@@ -56,3 +63,17 @@
     metadata:
       annotations:
         eks.amazonaws.com/role-arn: "arn:aws:iam::596601390909:role/cnpg-s3-backup-role"
+- op: add
+  path: /spec/managed
+  value:
+    roles:
+      - name: wms_service
+        ensure: present
+        login: true
+        passwordSecret:
+          name: shared-pg-wms-service-credentials
+      - name: scm_service
+        ensure: present
+        login: true
+        passwordSecret:
+          name: shared-pg-scm-service-credentials
