@@ -36,9 +36,7 @@ spec:
             - name: DB_NAME
               value: "{{ .Values.database.name }}"        # DB 이름
             - name: DB_USERNAME
-              valueFrom:                                  # 비번은 값 직접 안 쓰고 Secret에서 꺼냄
-                secretKeyRef:
-                  name: {{ .Values.database.username  }}              
+              value: "{{ .Values.database.username }}"   # 직접 값              
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
