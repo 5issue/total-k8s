@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.serviceName }}          # values의 serviceName이 채워짐 (예: auth-service)
+  namespace: backend
+spec:
+  replicas: {{ .Values.replicaCount }}      # 파드 개수 (values에서)
+  selector:
+    matchLabels:
+      app: {{ .Values.serviceName }}        # 이 라벨 붙은 파드를 내가 관리한다
+  template:                                 # ↓ 여기서부터 파드 하나의 설계
+    metadata:
+      labels:
+        app: {{ .Values.serviceName }}      # 파드에 붙일 라벨 (위 selector와 일치해야 함)
+    spec:
+      containers:
+        - name: {{ .Values.serviceName }}
+          # 이미지 주소 = 레지스트리/이미지이름:태그 (세 값 조합)
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}   # 컨테이너 포트 (예: 8081)
+          env:                              # ↓ 컨테이너에 넣을 환경변수
+            # RabbitMQ (values.yaml의 5671 + SSL이 여기로 들어감)
+            - name: SPRING_RABBITMQ_HOST
+              value: "{{ .Values.rabbitmq.host }}"
+            - name: SPRING_RABBITMQ_PORT
+              value: "{{ .Values.rabbitmq.port }}"          # 5671
+            - name: SPRING_RABBITMQ_SSL_ENABLED
+              value: "{{ .Values.rabbitmq.sslEnabled }}"    # true
+            # DB 접속 정보 (values의 database 블록에서 가져옴)
+            - name: DB_HOST
+              value: "{{ .Values.database.host }}"        # DB 주소
+            - name: DB_PORT
+              value: "{{ .Values.database.port }}"        # DB 포트
+            - name: DB_NAME
+              value: "{{ .Values.database.name }}"        # DB 이름
+            - name: DB_USERNAME
+              valueFrom:                                  # 비번은 값 직접 안 쓰고 Secret에서 꺼냄
+                secretKeyRef:
+                  name: {{ .Values.database.secretName }} # 이 Secret에서
+                  key: username                           # username 꺼냄
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretName }}
+                  key: password                           # password 꺼냄
+          
+          
+           # 생존 검사 — 실패하면 컨테이너 재시작
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.health.path }}        # /actuator/health
+              port: {{ .Values.containerPort }}      # 앱 포트로 물어봄
+            initialDelaySeconds: {{ .Values.health.livenessDelay }}   # 30초 뒤 시작
+          # 준비 검사 — 실패하면 트래픽 제외 (재시작은 안 함)
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.health.path }}
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: {{ .Values.health.readinessDelay }}  # 10초 뒤 시작
+          resources:                        # CPU·메모리 (values의 resources 통째로)
+            {{- toYaml .Values.resources | nindent 12 }}

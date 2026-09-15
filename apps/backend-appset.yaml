@@ -1,0 +1,41 @@
+# helm template 배포 
+# 기존 backend-app.yaml 삭제 여부 확인 helm template로 변경 할 지
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet                       # Application을 여러 개 자동 생성하는 리소스
+metadata:
+  name: backend-services
+  namespace: argocd
+spec:
+  goTemplate: true                         # {{.svc}} 같은 치환 문법 사용
+  generators:
+    - list:                                # 아래 목록을 하나씩 돌림 (for문)
+        elements:
+          - svc: auth                      # 이 목록에 서비스 추가하면 자동 배포됨
+          - svc: order
+          - svc: payment
+          - svc: product
+          - svc: user
+          - svc: wms
+          - svc: oms
+          - svc: scm
+  template:                                # ↓ 목록 각 항목마다 찍어낼 Application 틀
+    metadata:
+      name: 'backend-{{.svc}}'             # 예: backend-auth, backend-order ...
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/5issue/total-k8s.git'   # 우리 레포
+        targetRevision: main
+        path: charts/backend-service       # 우리가 만든 헬름 차트 위치
+        helm:
+          valueFiles:
+            - 'values/{{.svc}}.yaml'       # 서비스별 값 파일 (auth.yaml, order.yaml ...)
+      destination:
+        server: 'https://kubernetes.default.svc'   # 이 클러스터에
+        namespace: backend                 # backend 네임스페이스에 배포
+      syncPolicy:
+        automated:
+          selfHeal: true                   # Git과 실제가 다르면 자동으로 Git 상태로 되돌림
+          prune: true                      # Git에서 지운 건 클러스터에서도 삭제
+        syncOptions:
+          - CreateNamespace=true           # backend 네임스페이스 없으면 자동 생성

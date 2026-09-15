@@ -1,0 +1,15 @@
+# scm-service 전용 값 (공통은 values.yaml에서 물려받음)
+serviceName: scm-service        # 이 서비스 이름
+image:
+  repository: kurly-scm              # ECR 창고 이름
+containerPort: 8087            # scm 포트
+service:
+  port: 8087                   # Service 포트도 동일하게
+
+
+database:
+  type: postgresql
+  host: shared-pg-rw.backend.svc.cluster.local           # TODO[1] 재혁님 확인
+  port: 5432
+  name: scm_db                                       # ← 서비스마다 변경
+  secretName: shared-pg-app                              # CNPG 자동생성 (추정)

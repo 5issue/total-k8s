@@ -1,0 +1,15 @@
+# order-service 전용 값 (공통은 values.yaml에서 물려받음)
+serviceName: order-service        # 이 서비스 이름
+replicaCount: 2 
+image:
+  repository: kurly-order              # ECR 창고 이름
+containerPort: 8082            # order 포트
+service:
+  port: 8082                   # Service 포트도 동일하게
+
+database:
+  type: mysql
+  host: shared-mysql-primary.backend.svc.cluster.local   # TODO[1] 재혁님 확인 (실제 svc명)
+  port: 3306
+  name: order_db                                          # TODO[2] 확인
+  secretName: TODO-mysql-secret                          # TODO[3] MySQL Secret 이름 미정

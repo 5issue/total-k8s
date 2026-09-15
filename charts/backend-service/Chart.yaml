@@ -1,0 +1,6 @@
+apiVersion: v2                       # 헬름 차트 형식 버전 (v2 = 헬름3용, 고정값)
+name: backend-service                # 차트 이름 (8개 서비스가 공유하는 공통 틀)
+description: 5issue 백엔드 서비스 공통 배포 차트   # 이 차트 설명
+type: application                    
+version: 0.1.0                       # 차트 자체의 버전 (틀을 고칠 때마다 올림)
+appVersion: "1.0.0"                  # 배포하는 앱의 대표 버전 (그냥 표기용)

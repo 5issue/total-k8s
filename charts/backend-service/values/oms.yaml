@@ -1,0 +1,18 @@
+# oms-service 전용 값 (공통은 values.yaml에서 물려받음)
+serviceName: oms-service        # 이 서비스 이름 
+
+image:
+  repository: kurly-oms         # ECR 창고 이름 
+
+containerPort: 8086             # oms 포트 
+
+service:
+  port: 8086                    # Service 포트도 8086으로 맞춤
+
+
+database:
+  type: postgresql
+  host: shared-pg-rw.backend.svc.cluster.local           # TODO[1] 재혁님 확인
+  port: 5432
+  name: oms_db                                       # ← 서비스마다 변경
+  secretName: shared-pg-app                              # CNPG 자동생성 (추정)
