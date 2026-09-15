@@ -93,7 +93,7 @@ publish_target() {
         --type json \
         --patch-file /dev/stdin >/dev/null
   else
-    printf '%s\n' "${ca_pem}" |
+    printf '%s' "${ca_pem}" |
       "${KUBECTL[@]}" \
         --namespace "${namespace}" \
         create secret generic "${TARGET_SECRET}" \
