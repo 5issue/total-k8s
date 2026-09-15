@@ -37,5 +37,4 @@ spec:
         automated:
           selfHeal: true                   # Git과 실제가 다르면 자동으로 Git 상태로 되돌림
           prune: true                      # Git에서 지운 건 클러스터에서도 삭제
-        syncOptions:
-          - CreateNamespace=true           # backend 네임스페이스 없으면 자동 생성
+        

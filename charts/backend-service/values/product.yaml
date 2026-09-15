@@ -13,4 +13,6 @@ database:
   host: shared-pg-rw.backend.svc.cluster.local           # TODO[1] 재혁님 확인
   port: 5432
   name: product_db                                       # ← 서비스마다 변경
-  secretName: shared-pg-app                              # CNPG 자동생성 (추정)
+  secretName: shared-pg-product-service-credentials   # 서비스별 Secret
+  usernameKey: username                                # PostgreSQL은 username key 있음
+  passwordKey: password
