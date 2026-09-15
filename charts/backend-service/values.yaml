@@ -28,9 +28,13 @@ resources:
 
 # RabbitMQ (메시징) — ★ 5671 + SSL 확정 반영
 rabbitmq:
-  host: "rabbitmq.rabbitmq.svc.cluster.local"  # 클러스터 내부 주소
+  host: "rabbitmq.messaging.svc.cluster.local"  # 클러스터 내부 주소
   port: 5671                  # ★ TLS 전용 포트 (5672 아님)
   sslEnabled: true            # ★ SSL 켜기
+  caSecretName: rabbitmq-ca
+  caSecretKey: ca.crt
+  caMountPath: /etc/ssl/certs/rabbitmq
+  sslCertPath: /etc/ssl/certs/rabbitmq/ca.crt
 
 
   # 헬스체크 (건강검진) 설정
