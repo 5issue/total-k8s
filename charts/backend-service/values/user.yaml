@@ -13,4 +13,4 @@ database:
   name: user_db                                          # TODO[2] 확인
   secretName: shared-mysql-accounts          # MySQL 공용 Secret
   usernameKey: username                       # MySQL username key는확인 필요
-  passwordKey: auth_service_password 
+  passwordKey: member_service_password
