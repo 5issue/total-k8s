@@ -12,5 +12,5 @@ database:
   port: 3306
   name: user_db                                          # TODO[2] 확인
   secretName: shared-mysql-accounts          # MySQL 공용 Secret
-  usernameKey: username                       # MySQL username key는확인 필요
+  username: user_user                       # MySQL username key는확인 필요
   passwordKey: member_service_password

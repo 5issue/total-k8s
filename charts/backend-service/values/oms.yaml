@@ -17,4 +17,5 @@ database:
   name: oms_db
   secretName: shared-mysql-accounts                    # MySQL 공용 Secret
   passwordKey: oms_service_password                    # {서비스}_password 규칙
+  username: oms_user
   

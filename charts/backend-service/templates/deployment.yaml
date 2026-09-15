@@ -38,8 +38,7 @@ spec:
             - name: DB_USERNAME
               valueFrom:                                  # 비번은 값 직접 안 쓰고 Secret에서 꺼냄
                 secretKeyRef:
-                  name: {{ .Values.database.secretName }} # 이 Secret에서
-                  key: {{ .Values.database.usernameKey }}    # values에서 username key                      
+                  name: {{ .Values.database.username  }}              
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:

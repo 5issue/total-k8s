@@ -13,5 +13,5 @@ database:
   port: 3306
   name: payment_db                                          # TODO[2] 확인
   secretName: shared-mysql-accounts          # MySQL 공용 Secret
-  usernameKey: username                       # MySQL username key는 확인 필요
+  username: payment_user                       # MySQL username key는 확인 필요
   passwordKey: payment_service_password         
