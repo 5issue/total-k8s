@@ -53,6 +53,8 @@
   path: /spec/podTemplate/spec/securityContext
   value:
     runAsNonRoot: true
+    fsGroup: 10000
+    fsGroupChangePolicy: "OnRootMismatch"
     seccompProfile:
       type: RuntimeDefault
 - op: add
@@ -63,3 +65,6 @@
       drop: ["ALL"]
     readOnlyRootFilesystem: false
     runAsNonRoot: true
+- op: add
+  path: /spec/backupPolicyName
+  value: shared-mysql-daily

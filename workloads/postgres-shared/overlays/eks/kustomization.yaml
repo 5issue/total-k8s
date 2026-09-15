@@ -9,6 +9,7 @@ resources:
   - pdb.yaml
   - rbac-secret-access.yaml
   - service-databases.yaml
+  - scheduled-backup.yaml
 
 patches:
   - path: cluster-patch.yaml

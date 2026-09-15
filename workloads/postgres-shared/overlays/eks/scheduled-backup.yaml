@@ -1,0 +1,10 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: shared-pg-daily-backup
+spec:
+  schedule: "0 0 18 * * *"
+  backupOwnerReference: self
+  target: prefer-standby
+  cluster:
+    name: shared-pg

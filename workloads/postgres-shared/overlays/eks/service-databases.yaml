@@ -1,6 +1,16 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:
+  name: shared-pg-product-db
+spec:
+  cluster:
+    name: shared-pg
+  name: product_db
+  owner: product_service
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
   name: shared-pg-wms-db
 spec:
   cluster:

@@ -53,10 +53,19 @@
 - op: add
   path: /spec/backup
   value:
+    target: prefer-standby
+    retentionPolicy: "30d"
     barmanObjectStore:
       destinationPath: "s3://kurly-db-backup/shared-pg"
       s3Credentials:
         inheritFromIAMRole: true
+      wal:
+        compression: gzip
+        maxParallel: 2
+      data:
+        compression: gzip
+        jobs: 2
+        immediateCheckpoint: false
 - op: add
   path: /spec/serviceAccountTemplate
   value:
