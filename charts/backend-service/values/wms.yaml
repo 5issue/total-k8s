@@ -13,5 +13,5 @@ database:
   port: 5432
   name: wms_db                                       # ← 서비스마다 변경
   secretName: shared-pg-wms-service-credentials   # 서비스별 Secret
-  usernameKey: username                                # PostgreSQL은 username key 있음
+  username: wms_user                                # PostgreSQL은 username key 있음
   passwordKey: password

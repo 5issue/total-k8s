@@ -13,5 +13,5 @@ database:
   port: 5432
   name: scm_db                                       # ← 서비스마다 변경
   secretName: shared-pg-scm-service-credentials   # 서비스별 Secret
-  usernameKey: username                                # PostgreSQL은 username key 있음
+  username: scm_user                                # PostgreSQL은 username key 있음
   passwordKey: password

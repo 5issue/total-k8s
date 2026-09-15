@@ -14,5 +14,5 @@ database:
   port: 5432
   name: product_db                                       # ← 서비스마다 변경
   secretName: shared-pg-product-service-credentials   # 서비스별 Secret
-  usernameKey: username                                # PostgreSQL은 username key 있음
+  username: product_user                                # PostgreSQL은 username key 있음
   passwordKey: password
