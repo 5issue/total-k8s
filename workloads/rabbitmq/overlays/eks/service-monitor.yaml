@@ -7,6 +7,7 @@ metadata:
     app.kubernetes.io/component: metrics
     release: prometheus
 spec:
+  jobLabel: app.kubernetes.io/name
   namespaceSelector:
     matchNames:
       - messaging
