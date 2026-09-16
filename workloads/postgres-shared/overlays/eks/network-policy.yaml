@@ -19,6 +19,23 @@ spec:
         - podSelector:
             matchLabels:
               app: scm-service
+        - podSelector:
+            matchLabels:
+              app: oms-service
+      ports:
+        - protocol: TCP
+          port: 5432
+    - from:
+        - podSelector:
+            matchLabels:
+              role: db-migration
+      ports:
+        - protocol: TCP
+          port: 5432
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: shared-pg
       ports:
         - protocol: TCP
           port: 5432
@@ -26,6 +43,15 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 9187
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: prometheus
       ports:
         - protocol: TCP
           port: 9187
