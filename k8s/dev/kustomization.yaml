@@ -22,7 +22,18 @@ patches:
       - op: replace
         path: /metadata/annotations/alb.ingress.kubernetes.io~1group.order
         value: "21"
-      
+      # /docs 라우팅 
+      - op: add
+        path: /spec/rules/0/http/paths/-
+        value:
+          path: /docs
+          pathType: Prefix
+          backend:
+            service:
+              name: swagger-ui
+              port:
+                number: 8080
+
   # 프론트엔드 Ingress 패치
   - target:
       kind: Ingress

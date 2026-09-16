@@ -32,60 +32,60 @@ spec:
               service:
                 name: auth-service
                 port:
-                  number: 8081
+                  number: 8080
           - path: /api/v1/users
             pathType: Prefix
             backend:
               service:
                 name: user-service
                 port:
-                  number: 8088
+                  number: 8080
           - path: /api/v1/orders
             pathType: Prefix
             backend:
               service:
                 name: order-service
                 port:
-                  number: 8082
+                  number: 8080
           - path: /api/v1/carts
             pathType: Prefix
             backend:
               service:
                 name: order-service
                 port:
-                  number: 8082
+                  number: 8080
           - path: /api/v1/payments
             pathType: Prefix
             backend:
               service:
                 name: payment-service
                 port:
-                  number: 8083
+                  number: 8080
           - path: /api/v1/products
             pathType: Prefix
             backend:
               service:
                 name: product-service
                 port:
-                  number: 8084
+                  number: 8080
           - path: /api/v1/admin/oms
             pathType: Prefix
             backend:
               service:
                 name: oms-service
                 port:
-                  number: 8086
+                  number: 8080
           - path: /api/v1/admin/wms
             pathType: Prefix
             backend:
               service:
                 name: wms-service
                 port:
-                  number: 8085
+                  number: 8080
           - path: /api/v1/admin/scm
             pathType: Prefix
             backend:
               service:
                 name: scm-service
                 port:
-                  number: 8087
+                  number: 8080
