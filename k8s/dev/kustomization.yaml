@@ -20,8 +20,6 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: dev
-
-    patch: |-
       - op: replace
         path: /spec/rules/0/host
         value: dev.cloudyim.store
