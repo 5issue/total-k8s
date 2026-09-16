@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout                          # Deployment 대신 Rollout
+metadata:
+  name: auth-canary-demo
+  namespace: backend
+spec:
+  replicas: 4                          # 카나리 비율 보려면 여러 개
+  strategy:
+    canary:                            # 카나리 방식
+      steps:
+        - setWeight: 25                # 25%(1/4)만 새 버전
+        - pause: {duration: 30s}       # 30초 대기하며 관찰
+        - setWeight: 50                # 50%로 확대
+        - pause: {duration: 30s}
+        - setWeight: 75                # 75%로
+        - pause: {duration: 30s}
+        # 마지막은 자동으로 100%
+  selector:
+    matchLabels:
+      app: auth-canary-demo
+  template:
+    metadata:
+      labels:
+        app: auth-canary-demo
+    spec:
+      containers:
+        - name: auth
+          image: "596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-auth:latest"
+          ports:
+            - containerPort: 8081
