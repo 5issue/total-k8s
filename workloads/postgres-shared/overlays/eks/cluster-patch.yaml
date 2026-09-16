@@ -4,15 +4,11 @@
     shared_preload_libraries:
       - pgaudit
       - passwordcheck
-      - credcheck
     parameters:
       pgaudit.log: "all, -misc"
       pgaudit.log_catalog: "off"
       pgaudit.log_parameter: "on"
       pgaudit.log_relation: "on"
-      credcheck.password_min_length: "12"
-      credcheck.password_reuse_history: "3"
-      credcheck.password_valid_max: "90"
 - op: add
   path: /spec/affinity
   value:
