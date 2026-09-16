@@ -8,7 +8,6 @@ resources:
   - network-policy.yaml
   - pdb.yaml
   - password-policy-configmap.yaml
-  - service-accounts-job.yaml
   - rbac-secret-access.yaml
   - serviceAccount.yaml
   - scheduled-backup.yaml

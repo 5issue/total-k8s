@@ -27,3 +27,13 @@ spec:
     name: shared-pg
   name: scm_db
   owner: scm_service
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: shared-pg-oms-db
+spec:
+  cluster:
+    name: shared-pg
+  name: oms_db
+  owner: oms_service

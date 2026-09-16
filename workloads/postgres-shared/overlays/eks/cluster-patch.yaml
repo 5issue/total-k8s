@@ -76,6 +76,11 @@
   path: /spec/managed
   value:
     roles:
+      - name: product_service
+        ensure: present
+        login: true
+        passwordSecret:
+          name: shared-pg-product-service-credentials
       - name: wms_service
         ensure: present
         login: true
@@ -86,3 +91,8 @@
         login: true
         passwordSecret:
           name: shared-pg-scm-service-credentials
+      - name: oms_service
+        ensure: present
+        login: true
+        passwordSecret:
+          name: shared-pg-oms-service-credentials
