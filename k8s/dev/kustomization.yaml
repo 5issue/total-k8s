@@ -12,10 +12,15 @@ resources:
 
 # 운영 Ingress를 지우지 않고, Host와 순서(order)만 dev용으로 덮어쓰기!
 patches:
-  # 백엔드 Ingress 패치
+  # 백엔드 Ingress 패치, 네임스페이스를 dev 변경
   - target:
       kind: Ingress
       name: total-backend-ingress
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: dev
+
     patch: |-
       - op: replace
         path: /spec/rules/0/host
