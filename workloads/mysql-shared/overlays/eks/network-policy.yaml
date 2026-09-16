@@ -21,7 +21,7 @@ spec:
               app: payment-service
         - podSelector:
             matchLabels:
-              app: member-service
+              app: user-service
       ports:
         - protocol: TCP
           port: 3306
@@ -30,6 +30,13 @@ spec:
             matchLabels:
               app.kubernetes.io/name: mysql-backup
               app.kubernetes.io/created-by: moco
+      ports:
+        - protocol: TCP
+          port: 3306
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mysql-account-provisioner
       ports:
         - protocol: TCP
           port: 3306

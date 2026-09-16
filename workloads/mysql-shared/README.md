@@ -4,7 +4,7 @@
 
 ## 1. 개요
 
-* **대상 워크로드**: 5개 핵심 도메인 서비스 공유 클러스터 (`member`, `auth`, `order`, `payment`, `oms`)
+* **대상 워크로드**: 4개 핵심 도메인 서비스 공유 클러스터 (`user`, `auth`, `order`, `payment`) — oms는 postgres-shared(CNPG)로 이전됨
 * **인스턴스 구성**: 3 Replicas (쿼럼 유지를 위해 홀수 구성 필수)
 * **파드 배치 전략 (Affinity)**: `soft` (인프라 노드가 2대인 환경 특성상 완전 분산 불가에 따른 연성 안티-어피니티 적용)
 * **스토리지**: EBS `gp3`, `20Gi` (초기 프로비저닝 추정치, 운영 간 실측 후 증설 검토)
@@ -21,11 +21,10 @@
 
 | 계정명 | 매핑 데이터베이스 | 용도 및 권한 범위 |
 | :--- | :--- | :--- |
-| `member_service` | `member_db` | 회원 도메인 서비스 전용 DB 접근 |
-| `auth_service` | `auth_db` | 인증/인가 도메인 서비스 전용 DB 접근 |
-| `order_service` | `order_db` | 주문 도메인 서비스 전용 DB 접근 |
-| `payment_service` | `payment_db` | 결제 도메인 서비스 전용 DB 접근 |
-| `oms_service` | `oms_db` | 주문관리시스템(OMS) 전용 DB 접근 |
+| `user_user` | `user_db` | 회원 도메인 서비스(user-service) 전용 DB 접근 |
+| `auth_user` | `auth_db` | 인증/인가 도메인 서비스 전용 DB 접근 |
+| `order_user` | `order_db` | 주문 도메인 서비스 전용 DB 접근 |
+| `payment_user` | `payment_db` | 결제 도메인 서비스 전용 DB 접근 |
 | `root` | `*.*` (전체) | **클러스터 Bootstrap 및 인프라 유지보수 전용** (애플리케이션 직접 바인딩 금지) |
 
 > **관리자(root) 접근 화이트리스트:**
@@ -59,7 +58,7 @@
 * **제어 방식**: 서비스 메시(mTLS/Istio) 없이 순수 Kubernetes `NetworkPolicy`로 인바운드 트래픽 제어
 * **허용 룰**:
   * **포트**: TCP `3306`
-  * **인증 소스**: `member`, `auth`, `order`, `payment`, `oms` 서비스 Pod의 라벨(Label)만 인바운드 허용
+  * **인증 소스**: `user`, `auth`, `order`, `payment` 서비스 Pod의 라벨(Label)만 인바운드 허용
 
 ### 시크릿 접근 통제 (RBAC)
 * 데이터베이스 접속 자격 증명(Credential Secret)에 대한 `get`, `list` 권한은 `shared-mysql-secret-reader` 역할(Role/ClusterRole)을 통해서만 제한적으로 부여

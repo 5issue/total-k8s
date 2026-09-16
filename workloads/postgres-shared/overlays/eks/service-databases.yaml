@@ -6,7 +6,7 @@ spec:
   cluster:
     name: shared-pg
   name: product_db
-  owner: product_service
+  owner: product_user
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
@@ -16,7 +16,7 @@ spec:
   cluster:
     name: shared-pg
   name: wms_db
-  owner: wms_service
+  owner: wms_user
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
@@ -26,7 +26,7 @@ spec:
   cluster:
     name: shared-pg
   name: scm_db
-  owner: scm_service
+  owner: scm_user
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
@@ -36,4 +36,4 @@ spec:
   cluster:
     name: shared-pg
   name: oms_db
-  owner: oms_service
+  owner: oms_user
