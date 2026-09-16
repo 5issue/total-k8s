@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swagger-ui
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swagger-ui
+  template:
+    metadata:
+      labels:
+        app: swagger-ui
+    spec:
+      containers:
+        - name: swagger-ui
+          image: swaggerapi/swagger-ui:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: URLS
+              value: >-
+                [
+                  { "url": "http://auth-service:8080/v3/api-docs", "name": "1. Auth Service" },
+                  { "url": "http://order-service:8080/v3/api-docs", "name": "2. Order Service" },
+                  { "url": "http://payment-service:8080/v3/api-docs", "name": "3. Payment Service" },
+                  { "url": "http://product-service:8080/v3/api-docs", "name": "4. Product Service" },
+                  { "url": "http://wms-service:8080/v3/api-docs", "name": "5. WMS Service" },
+                  { "url": "http://oms-service:8080/v3/api-docs", "name": "6. OMS Service" },
+                  { "url": "http://scm-service:8080/v3/api-docs", "name": "7. SCM Service" },
+                  { "url": "http://user-service:8080/v3/api-docs", "name": "8. User Service" }
+                ]
+            - name: CONFIG_URL_FILTER_TYPE
+              value: "combo"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: swagger-ui
+  namespace: backend
+spec:
+  selector:
+    app: swagger-ui
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

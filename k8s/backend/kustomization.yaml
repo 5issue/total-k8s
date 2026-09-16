@@ -31,3 +31,6 @@ resources:
 
   - scm/deployment.yaml
   - scm/pdb.yaml
+
+  # 3. 통합 스웨거 리소스 경로 추가
+  - swagger/swagger-ui.yaml

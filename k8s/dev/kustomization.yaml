@@ -22,7 +22,7 @@ patches:
       - op: replace
         path: /metadata/annotations/alb.ingress.kubernetes.io~1group.order
         value: "21"
-
+      
   # 프론트엔드 Ingress 패치
   - target:
       kind: Ingress
