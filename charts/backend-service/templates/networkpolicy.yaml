@@ -24,5 +24,5 @@ spec:
         {{- end }}
       ports:
         - protocol: TCP
-          port: {{ .Values.containerPort }}   # 이 포트로만 진입 허용 (예: 8081)
+          port: {{ .Values.serverPort }}   # 이 포트로만 진입 허용 (8080)
 {{- end }}

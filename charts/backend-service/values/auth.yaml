@@ -2,14 +2,10 @@
 serviceName: auth-service        # 이 서비스 이름
 image:
   repository: kurly-auth              # ECR 창고 이름
-containerPort: 8081            # auth 포트
-service:
-  port: 8081                   # Service 포트도 동일하게
 
 database:
   type: mysql
   host: shared-mysql-primary.backend.svc.cluster.local   # TODO[1] 
-  port: 3306
   name: auth_db                                          # TODO[2] 확인
   secretName: shared-mysql-accounts          # MySQL 공용 Secret
   username: auth_user                       # MySQL username key는 확인 필요

@@ -4,16 +4,12 @@ serviceName: oms-service        # 이 서비스 이름
 image:
   repository: kurly-oms         # ECR 창고 이름 
 
-containerPort: 8086             # oms 포트 
 
-service:
-  port: 8086                    # Service 포트도 8086으로 맞춤
 
 
 database:
   type: mysql                                          # postgresql → mysql
   host: shared-mysql-primary.backend.svc.cluster.local # pg → mysql
-  port: 3306                                           # 5432 → 3306
   name: oms_db
   secretName: shared-mysql-accounts                    # MySQL 공용 Secret
   passwordKey: oms_service_password                    # {서비스}_password 규칙
