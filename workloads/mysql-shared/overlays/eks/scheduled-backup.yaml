@@ -3,7 +3,7 @@ kind: BackupPolicy
 metadata:
   name: shared-mysql-daily
 spec:
-  schedule: "0 0 16 * * *"
+  schedule: "0 16 * * *"
   jobConfig:
     serviceAccountName: shared-mysql-backup
     bucketConfig:
