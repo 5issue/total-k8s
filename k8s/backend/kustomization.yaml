@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   # 1. 공통 계정 및 인그레스
   - serviceAccount.yaml
-  - backend-ingress.yaml
 
   # 2. 마이크로서비스 배포 파일들 (경로 지정)
   - auth/deployment.yaml
