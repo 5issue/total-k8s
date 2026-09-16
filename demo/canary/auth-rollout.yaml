@@ -1,3 +1,5 @@
+# 카나리 방식
+
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout                          # Deployment 대신 Rollout
 metadata:
@@ -27,4 +29,4 @@ spec:
         - name: auth
           image: "596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-auth:latest"
           ports:
-            - containerPort: 8081
+            - containerPort: 8080
