@@ -16,7 +16,7 @@ spec:
       exclude: '{*.example,memo.md}'
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: monitoring # grafana 매니페스트에 지정된 namespace에 맞게 적용됨
+    namespace: prometheus # grafana 매니페스트에 지정된 namespace에 맞게 적용됨
   syncPolicy:
     automated:
       prune: true
