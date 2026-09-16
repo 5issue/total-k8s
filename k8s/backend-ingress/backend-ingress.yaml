@@ -89,10 +89,4 @@ spec:
                 name: scm-service
                 port:
                   number: 8080
-          - path: /docs
-            pathType: Prefix
-            backend:
-              service:
-                name: swagger-ui
-                port:
-                  number: 8080
+         
