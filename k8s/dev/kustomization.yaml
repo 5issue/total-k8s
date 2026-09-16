@@ -8,35 +8,10 @@ namespace: dev
 resources:
   - ../frontend
   - ../backend
-  - ../backend-ingress
+  - dev-backend-ingress.yaml
 
 # 운영 Ingress를 지우지 않고, Host와 순서(order)만 dev용으로 덮어쓰기!
 patches:
-  # 백엔드 Ingress 패치, 네임스페이스를 dev 변경
-  - target:
-      kind: Ingress
-      name: total-backend-ingress
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: dev
-      - op: replace
-        path: /spec/rules/0/host
-        value: dev.cloudyim.store
-      - op: replace
-        path: /metadata/annotations/alb.ingress.kubernetes.io~1group.order
-        value: "21"
-      # /docs 라우팅 
-      - op: add
-        path: /spec/rules/0/http/paths/-
-        value:
-          path: /docs
-          pathType: Prefix
-          backend:
-            service:
-              name: swagger-ui
-              port:
-                number: 8080
 
   # 프론트엔드 Ingress 패치
   - target:
