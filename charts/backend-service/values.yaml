@@ -62,3 +62,6 @@ networkPolicy:
   allowFromNamespaces:      # 이 네임스페이스에서 오는 트래픽만 허용
     - ingress-nginx         # 외부 진입 통로
     - backend               # 백엔드 서비스끼리
+
+# 모든 서비스 공통 포트 (쿠버네티스는 파드 격리라 통일 가능)
+serverPort: 8080

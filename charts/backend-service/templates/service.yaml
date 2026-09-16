@@ -8,6 +8,6 @@ spec:
   selector:
     app: {{ .Values.serviceName }}         # 이 라벨 붙은 파드로 트래픽을 보냄
   ports:
-    - port: {{ .Values.service.port }}     # Service가 받는 포트
-      targetPort: {{ .Values.containerPort }}  # 실제 컨테이너 포트로 넘김 (예: 8081)
+    - port: {{ .Values.serverPort }}     # Service가 받는 포트
+      targetPort: {{ .Values.serverPort }}  # 실제 컨테이너 포트로 넘김 (예: 8081)
       protocol: TCP
