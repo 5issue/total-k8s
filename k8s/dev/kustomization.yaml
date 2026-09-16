@@ -8,6 +8,7 @@ namespace: dev
 resources:
   - ../frontend
   - ../backend
+  - ../backend-ingress
 
 # 운영 Ingress를 지우지 않고, Host와 순서(order)만 dev용으로 덮어쓰기!
 patches:
