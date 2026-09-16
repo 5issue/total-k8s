@@ -1,0 +1,13 @@
+apiVersion: moco.cybozu.com/v1beta2
+kind: BackupPolicy
+metadata:
+  name: shared-mysql-daily
+spec:
+  schedule: "0 0 16 * * *"
+  jobConfig:
+    serviceAccountName: shared-mysql-backup
+    bucketConfig:
+      bucketName: kurly-mysql-backup
+      region: ap-northeast-2
+    workVolume:
+      emptyDir: {}

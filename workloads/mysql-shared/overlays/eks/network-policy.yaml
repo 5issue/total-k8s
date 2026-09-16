@@ -22,6 +22,17 @@ spec:
         - podSelector:
             matchLabels:
               app: member-service
+        - podSelector:
+            matchLabels:
+              app: oms-service
+      ports:
+        - protocol: TCP
+          port: 3306
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mysql-backup
+              app.kubernetes.io/created-by: moco
       ports:
         - protocol: TCP
           port: 3306
