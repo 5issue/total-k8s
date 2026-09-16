@@ -8,9 +8,11 @@ resources:
   - network-policy.yaml
   - pdb.yaml
   - password-policy-configmap.yaml
+  - primary-service-alias.yaml
   - rbac-secret-access.yaml
   - serviceAccount.yaml
   - scheduled-backup.yaml
+  - account-provisioning-job.yaml
 
 patches:
   - path: mysqlcluster-patch.yaml
