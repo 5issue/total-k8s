@@ -21,6 +21,20 @@ metadata:
       access_logs.s3.prefix=alb-logs,
       deletion_protection.enabled=false,
       idle_timeout.timeout_seconds=60
+    # /docs* 로 들어오는 요청을 백엔드의 /* 로 리라이트하여 전달하는 설정
+    alb.ingress.kubernetes.io/actions.swagger-ui-rewrite: |
+      {
+        "Type": "forward",
+        "ForwardConfig": {
+          "TargetGroups": [
+            {
+              "ServiceName": "swagger-ui",
+              "ServicePort": 8080,
+              "Weight": 100
+            }
+          ]
+        }
+      }
 spec:
   ingressClassName: alb
   rules:
