@@ -21,34 +21,20 @@ metadata:
       access_logs.s3.prefix=alb-logs,
       deletion_protection.enabled=false,
       idle_timeout.timeout_seconds=60
-    # /docs* 로 들어오는 요청을 백엔드의 /* 로 리라이트하여 전달하는 설정
-    alb.ingress.kubernetes.io/actions.swagger-ui-rewrite: |
-      {
-        "Type": "forward",
-        "ForwardConfig": {
-          "TargetGroups": [
-            {
-              "ServiceName": "swagger-ui",
-              "ServicePort": 8080,
-              "Weight": 100
-            }
-          ]
-        }
-      }
 spec:
   ingressClassName: alb
   rules:
     - host: "dev.cloudyim.store"
       http:
         paths:
-          # 1. 스웨거 UI 라우팅
-          - path: /docs
+          # 1. 프론트엔드 라우팅 
+          - path: /
             pathType: Prefix
             backend:
               service:
-                name: swagger-ui
+                name: total-client
                 port:
-                  number: 8080
+                  number: 80
           # 2. 백엔드 API 라우팅
           - path: /api/v1/auth
             pathType: Prefix
@@ -113,11 +99,22 @@ spec:
                 name: scm-service
                 port:
                   number: 8080
-          # 3. 프론트엔드 라우팅 (모든 루트 경로)
+          # 스웨거 UI 라우팅
+          # - path: /docs
+          #   pathType: Prefix
+          #   backend:
+          #     service:
+          #       name: swagger-ui
+          #       port:
+          #         number: 8080
+    #  Swagger UI 전용 서브도메인
+    - host: "docs.dev.cloudyim.store"
+      http:
+        paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: total-client
+                name: swagger-ui
                 port:
-                  number: 80
+                  number: 8080   

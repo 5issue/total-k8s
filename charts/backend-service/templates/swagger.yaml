@@ -35,8 +35,8 @@ spec:
                 ]
             - name: CONFIG_URL_FILTER_TYPE
               value: "combo"
-            - name: BASE_URL
-              value: "/docs"
+            # - name: BASE_URL
+            #   value: "/docs"
 ---
 apiVersion: v1
 kind: Service
