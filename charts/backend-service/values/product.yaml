@@ -13,6 +13,3 @@ database:
   secretName: shared-pg-product-service-credentials   # 서비스별 Secret
   username: product_user                                # PostgreSQL은 username key 있음
   passwordKey: password
-
-springdoc:
-  apiDocsPath: /api/v1/products/v3/api-docs

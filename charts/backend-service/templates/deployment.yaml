@@ -53,9 +53,7 @@ spec:
               value: "{{ .Values.redis.host }}"
             - name: REDIS_PORT
               value: "{{ .Values.redis.port }}"
-
-            - name: SPRINGDOC_API_DOCS_PATH
-              value: "{{ .Values.springdoc.apiDocsPath | default "/v3/api-docs" }}"
+          
           
            # 생존 검사 — 실패하면 컨테이너 재시작
           livenessProbe:

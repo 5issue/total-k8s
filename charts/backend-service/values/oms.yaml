@@ -12,6 +12,3 @@ database:
   username: oms_user
   passwordKey: password
 springProfile: prod
-
-springdoc:
-  apiDocsPath: /api/v1/admin/oms/v3/api-docs
