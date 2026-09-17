@@ -100,21 +100,10 @@ spec:
                 port:
                   number: 8080
           # 스웨거 UI 라우팅
-          # - path: /docs
-          #   pathType: Prefix
-          #   backend:
-          #     service:
-          #       name: swagger-ui
-          #       port:
-          #         number: 8080
-    #  Swagger UI 전용 서브도메인
-    - host: "docs.dev.cloudyim.store"
-      http:
-        paths:
-          - path: /
+          - path: /docs
             pathType: Prefix
             backend:
               service:
                 name: swagger-ui
                 port:
-                  number: 8080   
+                  number: 8080
