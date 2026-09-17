@@ -1,16 +1,15 @@
-# swagger-ui 전용 값 
 serviceName: swagger-ui
 replicaCount: 1
+
 image:
   repository: swaggerapi/swagger-ui
   tag: latest
+  pullPolicy: Always
 
-# 포트 설정 (Helm 차트 공통 템플릿에 맞춤)
 service:
   port: 8080
   targetPort: 8080
 
-# Swagger UI가 바라볼 API 문서 URL 환경변수 주입
 env:
   - name: URLS
     value: >-
