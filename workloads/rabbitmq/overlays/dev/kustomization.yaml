@@ -6,32 +6,12 @@ namespace: dev
 resources:
   - ../../base
   - namespace.yaml
-  - rabbitmq-tls.yaml
   - network-policy.yaml
-  - pdb.yaml
-  - provisioning-service-account.yaml
-  - provisioning-script.yaml
-  - metrics-service.yaml
+  - provisioning-job.yaml
   - service-monitor.yaml
-  - prometheus-rule.yaml
-configMapGenerator:
-  - name: rabbitmq-grafana-dashboard
-    files:
-      - rabbitmq-overview.json=dashboards/rabbitmq-overview.json
-    options:
-      disableNameSuffixHash: true
-      labels:
-        app.kubernetes.io/name: rabbitmq
-        app.kubernetes.io/component: dashboard
-        grafana_dashboard: "1"
+ 
 patches:
   - path: rabbitmq-cluster-patch.yaml
-    target:
-      group: rabbitmq.com
-      version: v1beta1
-      kind: RabbitmqCluster
-      name: rabbitmq
-  - path: rabbitmq-monitoring-patch.yaml
     target:
       group: rabbitmq.com
       version: v1beta1
