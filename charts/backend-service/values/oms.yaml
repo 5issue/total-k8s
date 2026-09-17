@@ -11,3 +11,4 @@ database:
   secretName: shared-pg-oms-service-credentials
   username: oms_user
   passwordKey: password
+springProfile: prod
