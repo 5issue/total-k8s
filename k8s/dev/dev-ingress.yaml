@@ -99,7 +99,52 @@ spec:
                 name: scm-service
                 port:
                   number: 8080
-          # 스웨거 UI 라우팅
+                  
+          # 3. Swagger UI가 찾는 /v3/api-docs 경로를 백엔드로 연결하는 룰
+          - path: /api/v1/auth/v3/api-docs
+            pathType: Exact
+            backend:
+              service:
+                name: auth-service
+                port:
+                  number: 8080
+          - path: /api/v1/users/v3/api-docs
+            pathType: Exact
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 8080
+          - path: /api/v1/orders/v3/api-docs
+            pathType: Exact
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 8080
+          - path: /api/v1/payments/v3/api-docs
+            pathType: Exact
+            backend:
+              service:
+                name: payment-service
+                port:
+                  number: 8080
+          - path: /api/v1/products/v3/api-docs
+            pathType: Exact
+            backend:
+              service:
+                name: product-service
+                port:
+                  number: 8080
+          - path: /api/v1/admin/wms/v3/api-docs
+            pathType: Exact
+            backend:
+              service:
+                name: wms-service
+                port:
+                  number: 8080
+
+          # 4. 스웨거 UI 라우팅
           - path: /docs
             pathType: Prefix
             backend:
