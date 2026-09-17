@@ -7,6 +7,6 @@ namespace: dev
 # 운영용 앱 리소스와 dev 전용 통합 인그레스만 사용
 resources:
   - ../frontend
-  - ../backend
+  # - ../backend
   - dev-ingress.yaml
 

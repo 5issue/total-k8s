@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: backend-services-dev
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - list:
+        elements:
+          - svc: auth
+          - svc: order
+          - svc: payment
+          - svc: product
+          - svc: user
+          - svc: wms
+          - svc: oms
+          - svc: scm
+  template:
+    metadata:
+      name: 'backend-dev-{{.svc}}'        # 예: backend-dev-auth, backend-dev-order ...
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/5issue/total-k8s.git'
+        targetRevision: main
+        path: charts/backend-service
+        helm:
+          valueFiles:
+            - 'values/{{.svc}}.yaml'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: dev                    # 배포할 네임스페이스를 dev로 지정
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
