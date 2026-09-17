@@ -5,7 +5,8 @@ image:
 
 database:
   type: mysql
-  host: shared-mysql-primary.backend.svc.cluster.local   # TODO[1] 
+  host: shared-mysql-primary.backend.svc.cluster.local   # TODO[1]
+  port: 3306
   name: auth_db                                          # TODO[2] 확인
   secretName: shared-mysql-accounts          # MySQL 공용 Secret
   username: auth_user                       # MySQL username key는 확인 필요

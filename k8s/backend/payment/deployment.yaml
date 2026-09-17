@@ -38,6 +38,27 @@ spec:
               value: "rabbitmq.messaging.svc.cluster.local"
             - name: SPRING_RABBITMQ_PORT
               value: "5671"
+            - name: SPRING_RABBITMQ_SSL_ENABLED
+              value: "true"
+            - name: RABBITMQ_SSL_CERT_PATH
+              value: "/etc/ssl/certs/rabbitmq/ca.crt"
+            - name: DB_HOST
+              value: "shared-mysql-primary.backend.svc.cluster.local"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: "payment_db"
+            - name: DB_USERNAME
+              value: "payment_user"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shared-mysql-accounts
+                  key: payment_service_password
+          volumeMounts:
+            - name: rabbitmq-ca
+              mountPath: /etc/ssl/certs/rabbitmq
+              readOnly: true
           resources:
             requests:
               cpu: "250m"
@@ -51,6 +72,13 @@ spec:
               port: 8080
             initialDelaySeconds: 15
             periodSeconds: 10
+      volumes:
+        - name: rabbitmq-ca
+          secret:
+            secretName: rabbitmq-ca
+            items:
+              - key: ca.crt
+                path: ca.crt
 ---
 apiVersion: v1
 kind: Service

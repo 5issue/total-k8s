@@ -38,6 +38,27 @@ spec:
               value: "rabbitmq.messaging.svc.cluster.local"
             - name: SPRING_RABBITMQ_PORT
               value: "5671"
+            - name: SPRING_RABBITMQ_SSL_ENABLED
+              value: "true"
+            - name: RABBITMQ_SSL_CERT_PATH
+              value: "/etc/ssl/certs/rabbitmq/ca.crt"
+            - name: DB_HOST
+              value: "shared-pg-rw.backend.svc.cluster.local"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "scm_db"
+            - name: DB_USERNAME
+              value: "scm_user"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shared-pg-scm-service-credentials
+                  key: password
+          volumeMounts:
+            - name: rabbitmq-ca
+              mountPath: /etc/ssl/certs/rabbitmq
+              readOnly: true
           resources:
             requests:
               cpu: "250m"
@@ -57,6 +78,13 @@ spec:
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 15
+      volumes:
+        - name: rabbitmq-ca
+          secret:
+            secretName: rabbitmq-ca
+            items:
+              - key: ca.crt
+                path: ca.crt
 ---
 apiVersion: v1
 kind: Service

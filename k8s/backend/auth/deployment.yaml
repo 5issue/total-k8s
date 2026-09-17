@@ -27,8 +27,61 @@ spec:
       containers:
         - name: auth-service
           image: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-auth:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          env:
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq.messaging.svc.cluster.local"
+            - name: SPRING_RABBITMQ_PORT
+              value: "5671"
+            - name: SPRING_RABBITMQ_SSL_ENABLED
+              value: "true"
+            - name: RABBITMQ_SSL_CERT_PATH
+              value: "/etc/ssl/certs/rabbitmq/ca.crt"
+            - name: DB_HOST
+              value: "shared-mysql-primary.backend.svc.cluster.local"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: "auth_db"
+            - name: DB_USERNAME
+              value: "auth_user"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shared-mysql-accounts
+                  key: auth_service_password
+          volumeMounts:
+            - name: rabbitmq-ca
+              mountPath: /etc/ssl/certs/rabbitmq
+              readOnly: true
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+      volumes:
+        - name: rabbitmq-ca
+          secret:
+            secretName: rabbitmq-ca
+            items:
+              - key: ca.crt
+                path: ca.crt
 
 ---
 # auth Service
