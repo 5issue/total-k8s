@@ -99,52 +99,7 @@ spec:
                 name: scm-service
                 port:
                   number: 8080
-          # 3. [핵심] Swagger UI가 명세를 가져갈 때 타격하는 전용 경로 
-          # (스웨거 UI 헬름 템플릿의 URLS 주소를 아래 경로들과 정확히 일치시켜야 합니다)
-          - path: /swagger-api/auth
-            pathType: Prefix
-            backend:
-              service:
-                name: auth-service
-                port:
-                  number: 8080
-          - path: /swagger-api/users
-            pathType: Prefix
-            backend:
-              service:
-                name: user-service
-                port:
-                  number: 8080
-          - path: /swagger-api/orders
-            pathType: Prefix
-            backend:
-              service:
-                name: order-service
-                port:
-                  number: 8080
-          - path: /swagger-api/payments
-            pathType: Prefix
-            backend:
-              service:
-                name: payment-service
-                port:
-                  number: 8080
-          - path: /swagger-api/products
-            pathType: Prefix
-            backend:
-              service:
-                name: product-service
-                port:
-                  number: 8080
-          - path: /swagger-api/wms
-            pathType: Prefix
-            backend:
-              service:
-                name: wms-service
-                port:
-                  number: 8080
-
-          # 4. 스웨거 UI 자체 라우팅
+          # 스웨거 UI 라우팅
           - path: /docs
             pathType: Prefix
             backend:
@@ -152,4 +107,5 @@ spec:
                 name: swagger-ui
                 port:
                   number: 8080
+          
           
