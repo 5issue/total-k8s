@@ -37,8 +37,8 @@ rabbitmq:
   # 헬스체크 (건강검진) 설정
 health:
   path: /actuator/health   # Spring Boot 기본 건강검진 주소
-  livenessDelay: 30        # 컨테이너 뜨고 30초 뒤부터 생존검사 시작 (앱 뜰 시간 줌)
-  readinessDelay: 10       # 10초 뒤부터 준비검사 시작
+  livenessDelay: 60        # 컨테이너 뜨고 30초 뒤부터 생존검사 시작 (앱 뜰 시간 줌)
+  readinessDelay: 30       # 10초 뒤부터 준비검사 시작
 
 # PDB (파드 중단 예산) 설정
 pdb:
