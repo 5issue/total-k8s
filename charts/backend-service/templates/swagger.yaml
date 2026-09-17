@@ -24,14 +24,14 @@ spec:
             - name: URLS
               value: >-
                 [
-                  { "url": "https://dev.cloudyim.store/api/v1/auth/v3/api-docs", "name": "1. Auth Service" },
-                  { "url": "https://dev.cloudyim.store/api/v1/orders/v3/api-docs", "name": "2. Order Service" },
-                  { "url": "https://dev.cloudyim.store/api/v1/payments/v3/api-docs", "name": "3. Payment Service" },
-                  { "url": "https://dev.cloudyim.store/api/v1/products/v3/api-docs", "name": "4. Product Service" },
-                  { "url": "https://dev.cloudyim.store/api/v1/admin/wms/v3/api-docs", "name": "5. WMS Service" },
-                  { "url": "https://dev.cloudyim.store/api/v1/admin/oms/v3/api-docs", "name": "6. OMS Service" },
-                  { "url": "https://dev.cloudyim.store/api/v1/admin/scm/v3/api-docs", "name": "7. SCM Service" },
-                  { "url": "https://dev.cloudyim.store/api/v1/users/v3/api-docs", "name": "8. User Service" }
+                  { "url": "https://dev.cloudyim.store/swagger-api/auth/v3/api-docs", "name": "1. Auth Service" },
+                  { "url": "https://dev.cloudyim.store/swagger-api/users/v3/api-docs", "name": "2. User Service" },
+                  { "url": "https://dev.cloudyim.store/swagger-api/orders/v3/api-docs", "name": "3. Order Service" },
+                  { "url": "https://dev.cloudyim.store/swagger-api/payments/v3/api-docs", "name": "4. Payment Service" },
+                  { "url": "https://dev.cloudyim.store/swagger-api/products/v3/api-docs", "name": "5. Product Service" },
+                  { "url": "https://dev.cloudyim.store/swagger-api/wms/v3/api-docs", "name": "6. WMS Service" },
+                  { "url": "https://dev.cloudyim.store/swagger-api/oms/v3/api-docs", "name": "7. OMS Service" },
+                  { "url": "https://dev.cloudyim.store/swagger-api/scm/v3/api-docs", "name": "8. SCM Service" }
                 ]
             - name: CONFIG_URL_FILTER_TYPE
               value: "combo"
