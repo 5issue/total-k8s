@@ -54,3 +54,8 @@ networkPolicy:
 
 # 모든 서비스 공통 포트 (쿠버네티스는 파드 격리라 통일 가능)
 serverPort: 8080
+
+# Redis 설정 (backend 네임스페이스의 redis Service)
+redis:
+  host: redis.backend.svc.cluster.local
+  port: 6379
