@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swagger-ui
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swagger-ui
+  template:
+    metadata:
+      labels:
+        app: swagger-ui
+    spec:
+      containers:
+        - name: swagger-ui
+          image: swaggerapi/swagger-ui:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: URLS
+              value: >-
+                [
+                  { "url": "https://dev.cloudyim.store/api/v1/auth/v3/api-docs", "name": "1. Auth Service" },
+                  { "url": "https://dev.cloudyim.store/api/v1/orders/v3/api-docs", "name": "2. Order Service" },
+                  { "url": "https://dev.cloudyim.store/api/v1/payments/v3/api-docs", "name": "3. Payment Service" },
+                  { "url": "https://dev.cloudyim.store/api/v1/products/v3/api-docs", "name": "4. Product Service" },
+                  { "url": "https://dev.cloudyim.store/api/v1/admin/wms/v3/api-docs", "name": "5. WMS Service" },
+                  { "url": "https://dev.cloudyim.store/api/v1/admin/oms/v3/api-docs", "name": "6. OMS Service" },
+                  { "url": "https://dev.cloudyim.store/api/v1/admin/scm/v3/api-docs", "name": "7. SCM Service" },
+                  { "url": "https://dev.cloudyim.store/api/v1/users/v3/api-docs", "name": "8. User Service" }
+                ]
+            - name: CONFIG_URL_FILTER_TYPE
+              value: "combo"
+            - name: BASE_URL
+              value: "/docs"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: swagger-ui
+  namespace: dev
+spec:
+  selector:
+    app: swagger-ui
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
