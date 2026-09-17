@@ -45,7 +45,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.secretName }}
-                  key: {{ .Values.database.passwordKey }}   # values에서 password key                      
+                  key: {{ .Values.database.passwordKey }}   # values에서 password key
+            # Redis 접속 (values의 redis 블록에서)
+            - name: REDIS_HOST
+              value: "{{ .Values.redis.host }}"
+            - name: REDIS_PORT
+              value: "{{ .Values.redis.port }}"
           
           
            # 생존 검사 — 실패하면 컨테이너 재시작
