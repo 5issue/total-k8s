@@ -12,3 +12,6 @@ database:
   secretName: shared-pg-wms-service-credentials   # 서비스별 Secret
   username: wms_user                                # PostgreSQL은 username key 있음
   passwordKey: password
+
+springdoc:
+  apiDocsPath: /api/v1/admin/wms/v3/api-docs

@@ -11,3 +11,6 @@ database:
   secretName: shared-mysql-accounts          # MySQL 공용 Secret
   username: user_user                       # MySQL username key는확인 필요
   passwordKey: member_service_password
+
+springdoc:
+  apiDocsPath: /api/v1/users/v3/api-docs

@@ -12,3 +12,6 @@ database:
   secretName: shared-pg-scm-service-credentials   # 서비스별 Secret
   username: scm_user                                # PostgreSQL은 username key 있음
   passwordKey: password
+
+springdoc:
+  apiDocsPath: /api/v1/admin/scm/v3/api-docs
