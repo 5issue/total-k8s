@@ -16,7 +16,7 @@ spec:
           - svc: wms
           - svc: oms
           - svc: scm
-          - svc: swagger-values
+          - svc: swagger
   template:
     metadata:
       name: 'backend-dev-{{.svc}}'        # 예: backend-dev-auth, backend-dev-order ...

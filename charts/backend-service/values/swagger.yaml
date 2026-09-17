@@ -1,4 +1,5 @@
 serviceName: swagger-ui
+namespace: dev
 replicaCount: 1
 
 image:
