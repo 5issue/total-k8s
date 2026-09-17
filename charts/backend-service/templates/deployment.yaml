@@ -54,16 +54,14 @@ spec:
           
            # 생존 검사 — 실패하면 컨테이너 재시작
           livenessProbe:
-            httpGet:
-              path: {{ .Values.health.path }}        # /actuator/health
-              port: {{ .Values.serverPort }}      # 앱 포트로 물어봄
-            initialDelaySeconds: {{ .Values.health.livenessDelay }}   # 30초 뒤 시작
+            tcpSocket:
+              port: {{ .Values.serverPort }}
+            initialDelaySeconds: {{ .Values.health.livenessDelay }}
           # 준비 검사 — 실패하면 트래픽 제외 (재시작은 안 함)
           readinessProbe:
-            httpGet:
-              path: {{ .Values.health.path }}
+            tcpSocket:
               port: {{ .Values.serverPort }}
-            initialDelaySeconds: {{ .Values.health.readinessDelay }}  # 10초 뒤 시작
+            initialDelaySeconds: {{ .Values.health.readinessDelay }}
           resources:                        # CPU·메모리 (values의 resources 통째로)
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
