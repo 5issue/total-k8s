@@ -21,7 +21,7 @@ metadata:
       access_logs.s3.prefix=alb-logs,
       deletion_protection.enabled=false,
       idle_timeout.timeout_seconds=60
-        alb.ingress.kubernetes.io/transforms.auth-service: >-
+    alb.ingress.kubernetes.io/transforms.auth-service: >-
       [
         {
           "type": "url-rewrite",
