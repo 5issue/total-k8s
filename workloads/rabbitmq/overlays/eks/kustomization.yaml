@@ -5,6 +5,7 @@ namespace: messaging
 
 resources:
   - ../../base
+  - rabbitmq-tls.yaml
   - metrics-service.yaml
   - namespace.yaml
   - network-policy.yaml

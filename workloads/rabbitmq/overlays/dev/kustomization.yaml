@@ -8,6 +8,7 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - provisioning-job.yaml
+  - rabbitmq-tls.yaml
   - service-monitor.yaml
  
 patches:

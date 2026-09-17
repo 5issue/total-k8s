@@ -6,5 +6,5 @@ resources:
   - provisioning-script.yaml
   - provisioning-service-account.yaml
   - rabbitmq-cluster.yaml
-  - rabbitmq-tls.yaml
+
 
