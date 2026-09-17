@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.serviceName }}          # values의 serviceName이 채워짐 (예: auth-service)
-  namespace: backend
 spec:
   replicas: {{ .Values.replicaCount }}      # 파드 개수 (values에서)
   selector:
