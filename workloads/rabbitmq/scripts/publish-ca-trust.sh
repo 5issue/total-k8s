@@ -4,12 +4,10 @@
 set +x
 set -euo pipefail
 
-readonly SOURCE_NAMESPACE="messaging"
 readonly TARGET_SECRET="rabbitmq-ca"
-readonly TARGET_NAMESPACES=("messaging" "backend")
 
 if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <kubectl-context> [source-secret ...]" >&2
+  echo "Usage: $0 <kubectl-context> [--mode production|dev] [source-secret ...]" >&2
   exit 2
 fi
 
@@ -21,6 +19,32 @@ if [[ -z "${KUBECTL_CONTEXT}" ]]; then
   echo "kubectl context must not be empty" >&2
   exit 2
 fi
+
+mode="production"
+if [[ "${1:-}" == "--mode" ]]; then
+  if [[ $# -lt 2 ]]; then
+    echo "--mode requires production or dev" >&2
+    exit 2
+  fi
+  mode="$2"
+  shift 2
+fi
+
+case "${mode}" in
+  production)
+    readonly SOURCE_NAMESPACE="messaging"
+    readonly TARGET_NAMESPACES=("messaging" "backend")
+    ;;
+  dev)
+    readonly SOURCE_NAMESPACE="dev"
+    readonly TARGET_NAMESPACES=("dev")
+    ;;
+  *)
+    echo "Invalid mode: ${mode}; expected production or dev" >&2
+    exit 2
+    ;;
+esac
+readonly mode
 
 if [[ $# -eq 0 ]]; then
   readonly SOURCE_SECRETS=("rabbitmq-ca-signing")

@@ -16,6 +16,8 @@ CA Certificate의 `status.notAfter`를 관측하고 만료 180일 전까지 roll
 
 최초 provisioning과 rollover 모두 [trust publication runbook](TRUST-PUBLICATION-RUNBOOK.md)이 `messaging/rabbitmq-ca-signing/tls.crt`만 취급하고 두 Namespace의 `rabbitmq-ca/ca.crt`를 생성하는 것을 전제로 합니다. publication은 승인된 시점에 수행하는 one-shot 절차이며 상시 controller로 자동화하지 않습니다.
 
+이 문서의 전환 순서는 production 기준입니다. dev CA는 production CA와 별개이며, dev에서 같은 절차를 검증할 때는 publication script에 `--mode dev`를 명시합니다. 이 경우 Source와 Target은 모두 `dev` Namespace로 제한되고 복수 signing Secret을 지정하는 dual trust 방식은 동일하게 유지됩니다.
+
 `renewal.policy: Disabled`는 만료 기반 자동 갱신만 막으므로 CA Certificate의 spec을 수정하거나 target Secret을 삭제하지 않습니다. CA-A → CA-B 전환은 기존 CA Certificate에 `cmctl renew`를 실행하는 방식이 아니라, CA-B를 별도 signing resource로 준비하는 아래 순서를 따릅니다.
 
 ## 전환 순서

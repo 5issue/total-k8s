@@ -1,6 +1,6 @@
 # RabbitMQ CA 신뢰 정보 배포 Runbook
 
-이 Runbook은 `messaging/rabbitmq-ca-signing`의 public `tls.crt`만 `messaging/rabbitmq-ca`와 `backend/rabbitmq-ca`의 `ca.crt`로 배포하는 one-shot 절차를 정의합니다.
+이 Runbook은 RabbitMQ CA signing Secret의 public `tls.crt`만 환경별 `rabbitmq-ca` Secret의 `ca.crt`로 배포하는 one-shot 절차를 정의합니다. 기본 production mode는 `messaging`과 `backend`를 대상으로 하며, 명시적인 dev mode는 `dev`만 대상으로 합니다.
 
 CA signing private key는 배포 대상에 포함하지 않으며, CA 신뢰 정보 배포를 위한 상시 controller는 사용하지 않습니다.
 
@@ -19,19 +19,13 @@ CA 자체를 교체하는 경우에는 [CA-ROLLOVER-RUNBOOK.md](CA-ROLLOVER-RUNB
 
 ## 보안 경계
 
-Source Secret:
+환경별 Source와 Target:
 
-- Namespace: `messaging`
-- Secret: `rabbitmq-ca-signing`
-- Public certificate: `tls.crt`
-- Private signing key: `tls.key`
-
-Target Secret:
-
-| Namespace | Secret | 배포하는 Key |
-| --- | --- | --- |
-| `messaging` | `rabbitmq-ca` | `ca.crt` |
-| `backend` | `rabbitmq-ca` | `ca.crt` |
+| Mode | Source | Target | 배포하는 Key |
+| --- | --- | --- | --- |
+| `production` (기본값) | `messaging/rabbitmq-ca-signing` | `messaging/rabbitmq-ca` | `ca.crt` |
+| `production` (기본값) | `messaging/rabbitmq-ca-signing` | `backend/rabbitmq-ca` | `ca.crt` |
+| `dev` | `dev/rabbitmq-ca-signing` | `dev/rabbitmq-ca` | `ca.crt` |
 
 Target에는 public CA certificate만 제공합니다.
 
@@ -58,9 +52,9 @@ Source Secret 접근 권한은 CA 신뢰 정보 배포가 필요한 시점에만
 실행 전에 다음 항목을 확인합니다.
 
 1. 대상 Kubernetes cluster와 `kubectl` context가 올바른지 확인합니다.
-2. `messaging/rabbitmq-ca-signing` Secret이 존재하는지 확인합니다.
+2. 선택한 mode의 Source Namespace에 `rabbitmq-ca-signing` Secret이 존재하는지 확인합니다.
 3. Source Secret 조회 및 대상 `rabbitmq-ca` 생성/갱신에 필요한 권한이 있는지 확인합니다.
-4. 대상 Namespace가 `messaging`, `backend`인지 확인합니다.
+4. production mode의 대상이 `messaging`, `backend`이고 dev mode의 대상이 `dev`인지 확인합니다.
 5. CA 교체 작업인 경우 사용할 CA signing Secret과 현재 교체 단계를 확인합니다.
 
 실제 권한 부여 방식은 해당 Kubernetes 접근 관리 기준에 따르며, 필요한 Secret과 Namespace 범위로 최소화합니다.
@@ -83,6 +77,28 @@ workloads/rabbitmq/scripts/publish-ca-trust.sh <kubectl-context>
 6. 두 대상 Secret의 key 구성과 certificate 일치 여부를 확인합니다.
 
 Source Secret 전체나 `tls.key`는 출력하거나 Target Secret으로 복제하지 않습니다.
+
+## dev CA 신뢰 정보 배포
+
+dev 실행은 mode를 반드시 명시하며, `dev/rabbitmq-ca-signing/tls.crt`를 `dev/rabbitmq-ca/ca.crt`에만 배포합니다.
+
+```bash
+workloads/rabbitmq/scripts/publish-ca-trust.sh \
+  <kubectl-context> \
+  --mode dev
+```
+
+Source와 Target Namespace는 mode별 고정 allowlist이므로 임의 Namespace를 입력할 수 없습니다. 따라서 production CA가 dev로, 또는 dev CA가 `messaging`이나 `backend`로 publication되는 조합을 CLI로 만들 수 없습니다.
+
+dev CA rollover가 필요한 경우 production과 동일하게 Source Secret 이름을 순서대로 추가할 수 있습니다. 모든 Source Secret은 반드시 `dev` Namespace에서만 조회되며 bundle은 `dev/rabbitmq-ca`에만 배포됩니다.
+
+```bash
+workloads/rabbitmq/scripts/publish-ca-trust.sh \
+  <kubectl-context> \
+  --mode dev \
+  rabbitmq-ca-signing \
+  rabbitmq-ca-signing-next
+```
 
 ## CA 교체 시 Dual Trust 배포
 
@@ -124,6 +140,8 @@ workloads/rabbitmq/scripts/publish-ca-trust.sh \
 
 `publish-ca-trust.sh`는 다음 기준으로 동작합니다.
 
+- mode를 생략하면 기존 production 경로만 사용하고, `--mode dev`는 dev 경로만 사용합니다.
+- Source와 Target Namespace는 mode별로 고정하며 CLI에서 임의 Namespace를 받지 않습니다.
 - Source Secret 전체를 YAML/JSON으로 출력하지 않습니다.
 - 각 signing Secret에서 `tls.crt`만 선택합니다.
 - Certificate를 디스크 파일로 저장하지 않습니다.
@@ -142,7 +160,8 @@ workloads/rabbitmq/scripts/publish-ca-trust.sh \
 
 - `messaging/rabbitmq-ca`가 존재하는지 확인
 - `backend/rabbitmq-ca`가 존재하는지 확인
-- 두 Secret의 data key가 `ca.crt`만 포함하는지 확인
+- dev mode를 실행한 경우 `dev/rabbitmq-ca`가 존재하는지 확인
+- 선택한 mode의 모든 Target Secret data key가 `ca.crt`만 포함하는지 확인
 - Source의 public CA와 Target trust certificate가 일치하는지 확인
 - CA 교체 중인 경우 의도한 CA들이 trust bundle에 포함되어 있는지 확인
 
@@ -170,7 +189,7 @@ CA 교체 중 문제가 발생한 경우 trust bundle을 임의로 축소하지 
 이 Runbook은 다음 범위를 대상으로 합니다.
 
 - CA public certificate 추출
-- `messaging`, `backend` Namespace의 trust Secret 생성 및 갱신
+- production의 `messaging`, `backend` 또는 dev의 `dev` Namespace에 있는 trust Secret 생성 및 갱신
 - Dual trust bundle 배포
 - CA-B-only trust bundle 전환
 - Source/Target certificate 정합성 확인
