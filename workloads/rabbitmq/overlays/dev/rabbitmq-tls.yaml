@@ -55,16 +55,16 @@ spec:
     - key encipherment
     - server auth
   dnsNames:
-    - rabbitmq.messaging.svc
-    - rabbitmq.messaging.svc.cluster.local
-    - "*.rabbitmq-nodes.messaging.svc"
-    - "*.rabbitmq-nodes.messaging.svc.cluster.local"
-    - rabbitmq-server-0.rabbitmq-nodes.messaging.svc
-    - rabbitmq-server-0.rabbitmq-nodes.messaging.svc.cluster.local
-    - rabbitmq-server-1.rabbitmq-nodes.messaging.svc
-    - rabbitmq-server-1.rabbitmq-nodes.messaging.svc.cluster.local
-    - rabbitmq-server-2.rabbitmq-nodes.messaging.svc
-    - rabbitmq-server-2.rabbitmq-nodes.messaging.svc.cluster.local
+    - rabbitmq.dev.svc
+    - rabbitmq.dev.svc.cluster.local
+    - "*.rabbitmq-nodes.dev.svc"
+    - "*.rabbitmq-nodes.dev.svc.cluster.local"
+    - rabbitmq-server-0.rabbitmq-nodes.dev.svc
+    - rabbitmq-server-0.rabbitmq-nodes.dev.svc.cluster.local
+    - rabbitmq-server-1.rabbitmq-nodes.dev.svc
+    - rabbitmq-server-1.rabbitmq-nodes.dev.svc.cluster.local
+    - rabbitmq-server-2.rabbitmq-nodes.dev.svc
+    - rabbitmq-server-2.rabbitmq-nodes.dev.svc.cluster.local
   issuerRef:
     name: rabbitmq-ca
     kind: Issuer
