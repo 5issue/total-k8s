@@ -8,6 +8,7 @@ image:
 database:
   type: postgresql
   host: shared-pg-rw.backend.svc.cluster.local           # TODO[1] 
+  port: 5432
   name: product_db                                       # ← 서비스마다 변경
   secretName: shared-pg-product-service-credentials   # 서비스별 Secret
   username: product_user                                # PostgreSQL은 username key 있음
