@@ -1,25 +1,24 @@
-{{- if ne .Values.serviceName "swagger-ui" -}}
+{{- if eq .Values.serviceName "swagger-ui" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.serviceName }}
+  name: swagger-ui
   namespace: dev
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.serviceName }}
+      app: swagger-ui
   template:
     metadata:
       labels:
-        app: {{ .Values.serviceName }}
+        app: swagger-ui
     spec:
       containers:
-        - name: {{ .Values.serviceName }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
+        - name: swagger-ui
+          image: swaggerapi/swagger-ui:latest
           ports:
-            - containerPort: {{ .Values.service.targetPort | default 8080 }}
+            - containerPort: 8080
           env:
             - name: URLS
               value: >-
@@ -41,13 +40,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.serviceName }}
+  name: swagger-ui
   namespace: dev
 spec:
   selector:
-    app: {{ .Values.serviceName }}
+    app: swagger-ui
   ports:
     - protocol: TCP
-      port: {{ .Values.service.port | default 8080 }}
-      targetPort: {{ .Values.service.targetPort | default 8080 }}
+      port: 8080
+      targetPort: 8080
 {{- end -}}
