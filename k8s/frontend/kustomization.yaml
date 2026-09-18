@@ -7,4 +7,3 @@ resources:
   - deployment.yaml
   - pdb.yaml
   - serviceAccount.yaml
-  - ../frontend-ingress
