@@ -33,6 +33,17 @@ rabbitmq:
   caMountPath: /etc/ssl/certs/rabbitmq
   sslCertPath: /etc/ssl/certs/rabbitmq/ca.crt
 
+  credentialsSecretName: rabbitmq-app-credentials
+  usernameKey: username
+  passwordKey: password
+  vhost: "/"
+
+redis:
+  host: redis.backend.svc.cluster.local
+  port: 6379
+
+  secretName: redis-credentials
+  passwordKey: password
 
   # 헬스체크 (건강검진) 설정
 health:

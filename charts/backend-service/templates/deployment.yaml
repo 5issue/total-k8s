@@ -53,6 +53,24 @@ spec:
               value: "{{ .Values.redis.host }}"
             - name: REDIS_PORT
               value: "{{ .Values.redis.port }}"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.redis.secretName }}
+                  key: {{ .Values.redis.passwordKey }}
+            # RABBITMQ 접속
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rabbitmq.credentialsSecretName }}
+                  key: {{ .Values.rabbitmq.usernameKey }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rabbitmq.credentialsSecretName }}
+                  key: {{ .Values.rabbitmq.passwordKey }}
+            - name: RABBITMQ_VHOST
+              value: {{ .Values.rabbitmq.vhost | quote }}
           
           
            # 생존 검사 — 실패하면 컨테이너 재시작
