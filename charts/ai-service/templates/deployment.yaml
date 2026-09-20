@@ -43,6 +43,10 @@ spec:
             - name: DB_USER
               value: "{{ .Values.database.username }}"
             - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: shared-pg-ai-service-credentials
             - name: DOCS_URL
               value: "/ai-docs"
               valueFrom:
