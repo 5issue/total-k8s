@@ -17,6 +17,15 @@ spec:
         - protocol: TCP
           port: 6379
 
+    # Dev Namespace는 backend Namespace의 공유 Redis를 사용
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dev
+      ports:
+        - protocol: TCP
+          port: 6379
+
     # Prometheus namespace에서 Exporter metrics 포트 접근
     - from:
         - namespaceSelector:
