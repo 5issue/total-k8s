@@ -44,6 +44,8 @@ kind: Service
 metadata:
   name: {{ .Values.serviceName }}
   namespace: {{ .Values.namespace | default "dev" }}
+  annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: "/docs/"
 spec:
   selector:
     app: {{ .Values.serviceName }}
