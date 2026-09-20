@@ -10,3 +10,16 @@ image:
 service:
   port: 8080
   targetPort: 8080
+
+# NetworkPolicy에서 허용할 Pod 포트
+serverPort: 8080
+
+networkPolicy:
+  enabled: true
+  allowFromNamespaces:
+    - ingress-nginx
+    - backend
+  # 실제 ALB 서브넷 CIDR로 교체해야 함
+  allowFromCidrs:
+    - "10.0.1.0/24"
+    - "10.0.2.0/24"

@@ -22,6 +22,13 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: {{ . }}   # 예: ingress-nginx, backend
         {{- end }}
+
+        {{/* 추가: ALB 서브넷 CIDR 허용 */}}
+        {{- range .Values.networkPolicy.allowFromCidrs }}
+        - ipBlock:
+            cidr: {{ . | quote }}
+        {{- end }}
+
       ports:
         - protocol: TCP
           port: {{ .Values.serverPort }}   # 이 포트로만 진입 허용 (8080)
