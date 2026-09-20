@@ -3,7 +3,7 @@ replicaCount: 1
 
 image:
   registry: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com
-  repository: kurly-ai-serving
+  repository: kurly-ai-assistant
   tag: "latest"
   pullPolicy: Always
 

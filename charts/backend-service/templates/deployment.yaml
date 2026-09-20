@@ -13,6 +13,20 @@ spec:
       labels:
         app: {{ .Values.serviceName }}      # 파드에 붙일 라벨 (위 selector와 일치해야 함)
     spec:
+      # 노드별 1대씩 분산 배치
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "topology.kubernetes.io/zone"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.serviceName }}
+        - maxSkew: 1
+          topologyKey: "kubernetes.io/hostname"
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Values.serviceName }}
       containers:
         - name: {{ .Values.serviceName }}
           # 이미지 주소 = 레지스트리/이미지이름:태그 (세 값 조합)
