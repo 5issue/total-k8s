@@ -69,6 +69,7 @@ rules:
     resources: ["secrets"]
     resourceNames:
       - rabbitmq-ca
+      - redis-credentials
     verbs: ["get", "patch"]
   - apiGroups: [""]
     resources: ["secrets"]
@@ -98,6 +99,7 @@ rules:
     resources: ["secrets"]
     resourceNames:
       - rabbitmq-ca
+      - redis-credentials
     verbs: ["get", "patch"]
   - apiGroups: [""]
     resources: ["secrets"]
