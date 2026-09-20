@@ -12,15 +12,3 @@ database:
   username: oms_user
   passwordKey: password
 springProfile: prod
-
-rabbitmq:
-  credentialsSecretName: rabbitmq-app-credentials
-  usernameKey: username
-  passwordKey: password
-  vhost: "/"
-
-redis:
-  host: redis.backend.svc.cluster.local
-  port: 6379
-  secretName: redis-credentials
-  passwordKey: password

@@ -29,7 +29,7 @@ rabbitmq:
   port: 5671                  # ★ TLS 전용 포트 (5672 아님)
   sslEnabled: true            # ★ SSL 켜기
   vhost: "/"                                   # vhost 기본값 추가
-  credentialsSecretName: rabbitmq-credentials  # 실제 생성된 RabbitMQ 계정 Secret 이름 (예: rabbitmq-default-user 또는 rabbitmq-user-credentials)
+  credentialsSecretName: rabbitmq-app-credentials  # 실제 생성된 RabbitMQ 계정 Secret 이름 (예: rabbitmq-default-user 또는 rabbitmq-user-credentials)
   usernameKey: username                        # Secret 안의 유저명 키 (일반적으로 username)
   passwordKey: password
   caSecretName: rabbitmq-ca
@@ -63,3 +63,5 @@ serverPort: 8080
 redis:
   host: redis.backend.svc.cluster.local
   port: 6379
+  secretName: redis-credentials
+  passwordKey: password
