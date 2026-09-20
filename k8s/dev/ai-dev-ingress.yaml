@@ -74,9 +74,8 @@ spec:
                 name: kurly-ai-serving
                 port:
                   number: 8000
-          # 기존 AI 문서 경로 유지
-          # AI 서버에서 이 경로를 실제로 제공해야 함
-          - path: /api/v1/ai
+          # Swagger 라우팅
+          - path: /openapi.json
             pathType: Prefix
             backend:
               service:

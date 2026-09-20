@@ -43,6 +43,8 @@ spec:
             - name: DB_USER
               value: "{{ .Values.database.username }}"
             - name: DB_PASSWORD
+            - name: DOCS_URL
+              value: "/ai-docs"
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.secretName }}

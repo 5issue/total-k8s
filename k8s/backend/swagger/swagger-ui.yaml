@@ -29,7 +29,8 @@ spec:
                   { "url": "https://dev.cloudyim.store/api/v1/admin/wms/v3/api-docs", "name": "5. WMS Service" },
                   { "url": "https://dev.cloudyim.store/api/v1/admin/oms/v3/api-docs", "name": "6. OMS Service" },
                   { "url": "https://dev.cloudyim.store/api/v1/admin/scm/v3/api-docs", "name": "7. SCM Service" },
-                  { "url": "https://dev.cloudyim.store/api/v1/users/v3/api-docs", "name": "8. User Service" }
+                  { "url": "https://dev.cloudyim.store/api/v1/users/v3/api-docs", "name": "8. User Service" },
+                  { "url": "https://dev.cloudyim.store/openapi.json", "name": "9. AI Recommendation Service" }
                 ]
             - name: CONFIG_URL_FILTER_TYPE
               value: "combo"
