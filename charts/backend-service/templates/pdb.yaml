@@ -4,7 +4,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ .Values.serviceName }}-pdb      # 예: oms-service-pdb
-  namespace: backend
+  namespace: {{ .Release.Namespace }}
 spec:
   maxUnavailable: {{ .Values.pdb.maxUnavailable }}   # minAvailable에서 변경
   selector:
