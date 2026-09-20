@@ -30,8 +30,9 @@ RabbitMQ Application credential의 Source of Truth는 AWS Secrets Manager입니�
 | ------------------------------------ | ---------------------- | ------------------------------------------ |
 | `messaging/rabbitmq-app-credentials` | `username`, `password` | RabbitMQ Application Identity Provisioning |
 | `backend/rabbitmq-app-credentials`   | `username`, `password` | Backend RabbitMQ 연결                        |
+| `dev/rabbitmq-app-credentials`       | `username`, `password` | Dev Backend RabbitMQ 연결                    |
 
-Application credential 구성·갱신·복구 시 두 Kubernetes Secret과 RabbitMQ의 `total-backend` user credential은 동일한 Secrets Manager version을 기준으로 최종 수렴하도록 관리합니다.
+Application credential 구성·갱신·복구 시 세 Kubernetes Secret과 RabbitMQ의 `total-backend` user credential은 동일한 Secrets Manager version을 기준으로 최종 수렴하도록 관리합니다.
 
 AWS Secrets Manager resource와 Kubernetes Secret publication 경로는 `total-infra`에서 관리합니다. 실제 credential 값과 SecretVersion 생성·갱신은 Terraform 관리 범위에 포함하지 않습니다.
 
@@ -44,7 +45,7 @@ Application Identity Provisioning 전 다음 순서로 credential을 준비합�
    다음 형태의 SecretVersion을 생성합니다.
    - `username`: `total-backend`
    - `password`: 발급된 Application password
-3. EKS와 `messaging`, `backend` Namespace가 준비된 이후
+3. EKS와 `messaging`, `backend`, `dev` Namespace가 준비된 이후
    `total-infra`에서 다음 명령을 실행합니다.
 
    `make rabbitmq-credential-publish`
@@ -54,10 +55,11 @@ Application Identity Provisioning 전 다음 순서로 credential을 준비합�
    `make rabbitmq-credential-verify`
 
 publication은 한 번의 실행에서 확인한 동일한 AWSCURRENT VersionId를 기준으로
-다음 두 Secret을 구성합니다.
+다음 세 Secret을 구성합니다.
 
 - `messaging/rabbitmq-app-credentials`
 - `backend/rabbitmq-app-credentials`
+- `dev/rabbitmq-app-credentials`
 
 이후 RabbitMQ Cluster와 다음 리소스가 준비된 상태에서
 Application Identity Provisioning을 수행합니다.
@@ -105,16 +107,20 @@ AWS Secrets Manager
         │           ↓
         │    RabbitMQ total-backend user
         │
-        └── backend/rabbitmq-app-credentials
+        ├── backend/rabbitmq-app-credentials
+        │           ↓
+        │    Backend Application
+        │
+        └── dev/rabbitmq-app-credentials
                     ↓
-             Backend Application
+              Dev Backend
 ```
 
 갱신 절차:
 
 1. AWS Secrets Manager에 새로운 Application credential version을 준비합니다.
-2. `total-infra`에서 `make rabbitmq-credential-publish`를 실행해 현재 AWSCURRENT VersionId의 credential을 두 Kubernetes Secret에 반영합니다.
-3. `make rabbitmq-credential-verify`로 두 Secret의 source VersionId 일치 여부를 확인합니다.
+2. `total-infra`에서 `make rabbitmq-credential-publish`를 실행해 현재 AWSCURRENT VersionId의 credential을 세 Kubernetes Secret에 반영합니다.
+3. `make rabbitmq-credential-verify`로 세 Secret의 source VersionId 일치 여부를 확인합니다.
 4. Provisioning Job을 실행해 RabbitMQ의 `total-backend` credential을 갱신합니다.
 5. RabbitMQ의 user/vhost/permission 상태를 확인합니다.
 6. Backend가 새로운 credential을 사용하도록 재연결합니다.
@@ -129,8 +135,8 @@ Application credential 또는 RabbitMQ Application Identity를 복구할 때는 
 복구 절차:
 
 1. AWS Secrets Manager의 현재 Application credential version을 확인합니다.
-2. `total-infra`에서 `make rabbitmq-credential-publish`를 실행해 현재 AWSCURRENT VersionId의 credential을 두 Kubernetes Secret에 반영합니다.
-3. `make rabbitmq-credential-verify`로 두 Secret의 source VersionId 일치 여부를 확인합니다.
+2. `total-infra`에서 `make rabbitmq-credential-publish`를 실행해 현재 AWSCURRENT VersionId의 credential을 세 Kubernetes Secret에 반영합니다.
+3. `make rabbitmq-credential-verify`로 세 Secret의 source VersionId 일치 여부를 확인합니다.
 4. RabbitMQ TLS와 Management API `15671` 접근 상태를 확인합니다.
 5. Provisioning Job을 실행해 `total-prod` vhost, `total-backend` user 및 permission을 계약 상태로 구성합니다.
 6. RabbitMQ의 user/vhost/permission 상태를 확인합니다.
