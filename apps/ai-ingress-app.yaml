@@ -13,7 +13,7 @@ spec:
     path: k8s/ai-ingress
   destination:
     server: https://kubernetes.default.svc
-    namespace: ai
+    namespace: backend
   syncPolicy:
     automated:
       prune: true

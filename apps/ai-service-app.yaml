@@ -16,7 +16,7 @@ spec:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: ai
+    namespace: backend
   syncPolicy:
     automated:
       prune: true
