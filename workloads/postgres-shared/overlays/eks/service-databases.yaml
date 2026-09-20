@@ -37,3 +37,13 @@ spec:
     name: shared-pg
   name: oms_db
   owner: oms_user
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: shared-pg-ai-db
+spec:
+  cluster:
+    name: shared-pg
+  name: ai_db
+  owner: ai_user

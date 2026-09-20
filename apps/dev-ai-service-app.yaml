@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: backend-dev-ai 
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/5issue/total-k8s.git'
+    targetRevision: main
+    path: charts/ai-service # AI 전용 경량 차트 지정
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev 
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true

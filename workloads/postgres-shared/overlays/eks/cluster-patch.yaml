@@ -92,3 +92,8 @@
         login: true
         passwordSecret:
           name: shared-pg-oms-service-credentials
+      - name: ai_user
+        ensure: present
+        login: true
+        passwordSecret:
+          name: shared-pg-ai-service-credentials

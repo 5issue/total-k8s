@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.serviceName }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.serviceName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.serviceName }}
+    spec:
+      containers:
+        - name: {{ .Values.serviceName }}
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.serverPort }}
+          env:
+            - name: SERVER_PORT
+              value: "{{ .Values.serverPort }}"
+            - name: DB_HOST
+              value: "{{ .Values.database.host }}"
+            - name: DB_PORT
+              value: "{{ .Values.database.port }}"
+            - name: DB_NAME
+              value: "{{ .Values.database.name }}"
+            - name: DB_USER
+              value: "{{ .Values.database.username }}"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretName }}
+                  key: {{ .Values.database.passwordKey }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.serverPort }}
+            initialDelaySeconds: {{ .Values.health.livenessDelay }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.serverPort }}
+            initialDelaySeconds: {{ .Values.health.readinessDelay }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

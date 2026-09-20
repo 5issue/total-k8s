@@ -1,0 +1,31 @@
+serviceName: kurly-ai-serving
+replicaCount: 1
+
+image:
+  registry: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com
+  repository: kurly-ai-serving
+  tag: "latest"
+  pullPolicy: Always
+
+serverPort: 8000
+
+# CNPG 연결 설정
+database:
+  host: shared-pg-rw.dev.svc.cluster.local
+  port: 5432
+  name: ai_db
+  username: ai_user
+  secretName: shared-pg-ai-service-credentials
+  passwordKey: password
+
+health:
+  livenessDelay: 20
+  readinessDelay: 15
+# 테스트용 권장 리소스 설정
+resources:
+  requests:
+    cpu: 50m
+    memory: 256Mi
+  limits:
+    cpu: 250m
+    memory: 512Mi

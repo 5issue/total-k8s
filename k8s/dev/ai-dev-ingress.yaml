@@ -1,0 +1,85 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ai-dev-ingress
+  namespace: dev
+  annotations:
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/group.name: "main-alb-group"
+    alb.ingress.kubernetes.io/group.order: "4"
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTP"
+    alb.ingress.kubernetes.io/healthcheck-port: "traffic-port"
+    alb.ingress.kubernetes.io/success-codes: "200-399"
+spec:
+  ingressClassName: alb
+  rules:
+    - host: "dev.cloudyim.store"
+      http:
+        paths:
+          # My냉장고 품목 목록 / 추가 / 수정 / 삭제
+          - path: /api/v1/users/me/fridge
+            pathType: Prefix
+            backend:
+              service:
+                name: kurly-ai-serving
+                port:
+                  number: 8000
+          # 버블 기반 상품 추천    
+          - path: /api/v1/recommendations/products
+            pathType: Prefix
+            backend:
+              service:
+                name: kurly-ai-serving
+                port:
+                  number: 8000
+          # My냉장고 기반 레시피 추천
+          - path: /api/v1/recommendations/my-recipes
+            pathType: Prefix
+            backend:
+              service:
+                name: kurly-ai-serving
+                port:
+                  number: 8000
+          # 레시피 상세 / 부족 재료 계산 / 부족 재료 상품 추천
+          - path: /api/v1/recipes
+            pathType: Prefix
+            backend:
+              service:
+                name: kurly-ai-serving
+                port:
+                  number: 8000
+          # 상품 보관 가이드
+          - path: /api/v1/products/*/storage-guide
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kurly-ai-serving
+                port:
+                  number: 8000
+          # 상품으로 만들 수 있는 레시피
+          - path: /api/v1/products/*/recipes
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kurly-ai-serving
+                port:
+                  number: 8000
+          # 홈 버블 목록
+          - path: /api/v1/home/bubbles
+            pathType: Prefix
+            backend:
+              service:
+                name: kurly-ai-serving
+                port:
+                  number: 8000
+          # 기존 AI 문서 경로 유지
+          # AI 서버에서 이 경로를 실제로 제공해야 함
+          - path: /api/v1/ai
+            pathType: Prefix
+            backend:
+              service:
+                name: kurly-ai-serving
+                port:
+                  number: 8000
