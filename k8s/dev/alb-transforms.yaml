@@ -100,15 +100,4 @@ metadata:
         }
       ]
 
-    # AI Assistant 서빙용 (FastAPI openapi.json 매핑)
-    alb.ingress.kubernetes.io/transforms.kurly-ai-serving: >-
-      [
-        {
-          "type": "url-rewrite",
-          "urlRewriteConfig": {
-            "rewrites": [
-              { "regex": "^/api/v1/ai/v3/api-docs$", "replace": "/openapi.json" }
-            ]
-          }
-        }
-      ]
+    
