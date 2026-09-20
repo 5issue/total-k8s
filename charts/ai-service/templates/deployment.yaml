@@ -45,14 +45,10 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: password
-                  name: shared-pg-ai-service-credentials
-            - name: DOCS_URL
-              value: "/ai-docs"
-              valueFrom:
-                secretKeyRef:
                   name: {{ .Values.database.secretName }}
                   key: {{ .Values.database.passwordKey }}
+            - name: DOCS_URL
+              value: "/ai-docs"  
             - name: DATABASE_URL
               value: "postgresql://{{ .Values.database.username }}:$(DB_PASSWORD)@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
           livenessProbe:
