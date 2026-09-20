@@ -74,8 +74,8 @@ spec:
                 name: kurly-ai-serving
                 port:
                   number: 8000
-          # Swagger 라우팅
-          - path: /openapi.json
+          # AI Swagger 문서 스펙 라우팅
+          - path: /api/v1/ai/v3/api-docs
             pathType: Prefix
             backend:
               service:

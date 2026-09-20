@@ -101,7 +101,7 @@ metadata:
       ]
 
     # AI Assistant 서빙용 (FastAPI openapi.json 매핑)
-    alb.ingress.kubernetes.io/transforms.ai-service: >-
+    alb.ingress.kubernetes.io/transforms.kurly-ai-serving: >-
       [
         {
           "type": "url-rewrite",
