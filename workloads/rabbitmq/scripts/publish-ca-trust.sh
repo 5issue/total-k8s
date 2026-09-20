@@ -7,7 +7,7 @@ set -euo pipefail
 readonly TARGET_SECRET="rabbitmq-ca"
 
 if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <kubectl-context> [--mode production|dev] [source-secret ...]" >&2
+  echo "Usage: $0 <kubectl-context> [--mode production] [source-secret ...]" >&2
   exit 2
 fi
 
@@ -23,7 +23,7 @@ fi
 mode="production"
 if [[ "${1:-}" == "--mode" ]]; then
   if [[ $# -lt 2 ]]; then
-    echo "--mode requires production or dev" >&2
+    echo "--mode requires production" >&2
     exit 2
   fi
   mode="$2"
@@ -33,14 +33,10 @@ fi
 case "${mode}" in
   production)
     readonly SOURCE_NAMESPACE="messaging"
-    readonly TARGET_NAMESPACES=("messaging" "backend")
-    ;;
-  dev)
-    readonly SOURCE_NAMESPACE="dev"
-    readonly TARGET_NAMESPACES=("dev")
+    readonly TARGET_NAMESPACES=("messaging" "backend" "dev")
     ;;
   *)
-    echo "Invalid mode: ${mode}; expected production or dev" >&2
+    echo "Invalid mode: ${mode}; expected production" >&2
     exit 2
     ;;
 esac
