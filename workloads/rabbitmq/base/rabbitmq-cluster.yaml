@@ -10,3 +10,19 @@ spec:
   replicas: 3
   service:
     type: ClusterIP
+  override:
+    statefulSet:
+      spec:
+        template:
+          spec:
+            containers:
+              - name: rabbitmq
+                startupProbe:
+                  failureThreshold: 60
+                  httpGet:
+                    path: /api/health/checks/local-alarms
+                    port: 15671
+                    scheme: HTTPS
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  timeoutSeconds: 5

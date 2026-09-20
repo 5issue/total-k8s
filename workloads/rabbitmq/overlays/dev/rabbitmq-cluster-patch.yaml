@@ -68,6 +68,18 @@
                 type: RuntimeDefault
             containers:
               - name: rabbitmq
+                # ==========================================
+                # Startup Probe 데드락 방지 헬스체크
+                # ==========================================
+                startupProbe:
+                  failureThreshold: 60
+                  httpGet:
+                    path: /api/health/checks/local-alarms
+                    port: 15671
+                    scheme: HTTPS
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  timeoutSeconds: 5
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:

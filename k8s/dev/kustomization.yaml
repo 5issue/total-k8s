@@ -10,5 +10,5 @@ resources:
   - dev-ingress.yaml
   - ai-dev-ingress.yaml
 
-patches:
-  - path: alb-transforms.yaml
+# patches:
+#   - path: alb-transforms.yaml
