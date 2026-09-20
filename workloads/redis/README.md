@@ -1,6 +1,6 @@
 # Redis Kubernetes 구성
 
-Backend에서 사용하는 single-replica Redis workload의 Kubernetes 구성입니다.
+`backend`와 `dev` Namespace에서 공유하는 single-replica Redis workload의 Kubernetes 구성입니다. Redis workload는 `backend` Namespace에만 배포합니다.
 
 ## 구성
 
@@ -26,18 +26,20 @@ Redis Service와 headless Service는 클러스터 외부에 노출하지 않습�
 | ---------------- | ---------------------------------------- |
 | `REDIS_HOST`     | `redis.backend.svc.cluster.local`        |
 | `REDIS_PORT`     | `6379`                                   |
-| `REDIS_PASSWORD` | `backend/redis-credentials` Secret의 `password` |
+| `REDIS_PASSWORD` | Pod Namespace의 `redis-credentials` Secret `password` |
 
 Kubernetes Secret 계약은 다음과 같습니다.
 
 | 항목                | 값                                                  |
 | ----------------- | -------------------------------------------------- |
 | Source of Truth   | AWS Secrets Manager `prod/total/redis-credentials` |
-| Kubernetes Secret | `backend/redis-credentials`                        |
+| Kubernetes Secrets | `backend/redis-credentials`, `dev/redis-credentials` |
 | Secret type       | `Opaque`                                           |
 | Secret key        | `password`                                         |
 
 AWS Secrets Manager resource와 Kubernetes Secret publication은 `total-infra`에서 관리합니다.
+
+두 Namespace의 workload는 `redis.backend.svc.cluster.local:6379`에 연결하며, 각 Pod Namespace에 publication된 동일 `AWSCURRENT` credential을 사용합니다. 개별 서비스의 Redis 사용 여부와 Helm values는 기존 Backend 계약에서 관리합니다.
 
 상세 credential lifecycle, publication 및 EKS 재생성 후 복구 절차는 [CREDENTIAL-PUBLICATION-RUNBOOK.md](CREDENTIAL-PUBLICATION-RUNBOOK.md)를 따릅니다.
 
