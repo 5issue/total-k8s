@@ -28,6 +28,10 @@ rabbitmq:
   host: "rabbitmq.messaging.svc.cluster.local"  # 클러스터 내부 주소
   port: 5671                  # ★ TLS 전용 포트 (5672 아님)
   sslEnabled: true            # ★ SSL 켜기
+  vhost: "/"                                   # vhost 기본값 추가
+  credentialsSecretName: rabbitmq-credentials  # 실제 생성된 RabbitMQ 계정 Secret 이름 (예: rabbitmq-default-user 또는 rabbitmq-user-credentials)
+  usernameKey: username                        # Secret 안의 유저명 키 (일반적으로 username)
+  passwordKey: password
   caSecretName: rabbitmq-ca
   caSecretKey: ca.crt
   caMountPath: /etc/ssl/certs/rabbitmq
