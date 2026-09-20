@@ -1,0 +1,118 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: total-workload-publication-namespace-reader
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    resourceNames:
+      - messaging
+      - backend
+      - dev
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: total-workload-publication-namespace-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: total-workload-publication-namespace-reader
+subjects:
+  - kind: Group
+    name: total:workload-publication
+    apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: total-workload-publication
+  namespace: messaging
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - rabbitmq-ca-signing
+      - rabbitmq-ca
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - rabbitmq-ca
+    verbs: ["patch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: total-workload-publication
+  namespace: messaging
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: total-workload-publication
+subjects:
+  - kind: Group
+    name: total:workload-publication
+    apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: total-workload-publication
+  namespace: backend
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - rabbitmq-ca
+    verbs: ["get", "patch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: total-workload-publication
+  namespace: backend
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: total-workload-publication
+subjects:
+  - kind: Group
+    name: total:workload-publication
+    apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: total-workload-publication
+  namespace: dev
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - rabbitmq-ca
+    verbs: ["get", "patch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: total-workload-publication
+  namespace: dev
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: total-workload-publication
+subjects:
+  - kind: Group
+    name: total:workload-publication
+    apiGroup: rbac.authorization.k8s.io
