@@ -47,6 +47,8 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.database.secretName }}
                   key: {{ .Values.database.passwordKey }}
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.database.username }}:$(DB_PASSWORD)@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
           livenessProbe:
             tcpSocket:
               port: {{ .Values.serverPort }}
