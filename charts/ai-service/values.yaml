@@ -11,7 +11,7 @@ serverPort: 8000
 
 # CNPG 연결 설정
 database:
-  host: shared-pg-rw
+  host: shared-pg-rw.backend.svc.cluster.local
   port: 5432
   name: ai_db
   username: ai_user
