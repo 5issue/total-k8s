@@ -30,13 +30,33 @@ spec:
             matchLabels:
               app.kubernetes.io/name: mysql-backup
               app.kubernetes.io/created-by: moco
-      ports:
-        - protocol: TCP
-          port: 3306
-    - from:
         - podSelector:
             matchLabels:
               app: mysql-account-provisioner
       ports:
         - protocol: TCP
           port: 3306
+      
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: moco-system
+      ports:
+        - protocol: TCP
+          port: 33062
+        - protocol: TCP
+          port: 3306
+
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: shared-mysql
+      ports:
+        - protocol: TCP
+          port: 3306
+        - protocol: TCP
+          port: 33060
+        - protocol: TCP
+          port: 33062
+        - protocol: TCP
+          port: 9081
