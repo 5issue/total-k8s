@@ -9,7 +9,18 @@ spec:
   policyTypes:
     - Ingress
   ingress:
+    # backend 및 dev 네임스페이스의 백엔드 서비스들 허용
     - from:
+        # dev 네임스페이스의 앱들
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dev
+          podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values: ["auth-service", "order-service", "payment-service", "user-service"]
+        # backend 네임스페이스 내부 앱들
         - podSelector:
             matchLabels:
               app: auth-service
@@ -25,6 +36,7 @@ spec:
       ports:
         - protocol: TCP
           port: 3306
+    # 백업 파드 허용 (기존 유지)
     - from:
         - podSelector:
             matchLabels:
@@ -33,6 +45,7 @@ spec:
       ports:
         - protocol: TCP
           port: 3306
+    # 계정 프로비저너 허용 (기존 유지)
     - from:
         - podSelector:
             matchLabels:
