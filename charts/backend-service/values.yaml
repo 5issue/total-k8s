@@ -9,7 +9,6 @@ image:
   tag: "latest"               # 이미지 태그
   pullPolicy: Always          # 항상 최신 이미지 받기
 
-
 # 서비스(고정 진입점) 설정
 service:
   type: ClusterIP             # 클러스터 내부 전용
@@ -37,7 +36,6 @@ rabbitmq:
   caMountPath: /etc/ssl/certs/rabbitmq
   sslCertPath: /etc/ssl/certs/rabbitmq/ca.crt
 
-
   # 헬스체크 (건강검진) 설정
 health:
   path: /actuator/health   # Spring Boot 기본 건강검진 주소
@@ -46,15 +44,7 @@ health:
 
 # PDB (파드 중단 예산) 설정
 pdb:
-  maxUnavailable: 1     # 최대 1개까지만 동시에 내려라
-
-
-# NetworkPolicy (네트워크 방화벽) 설정
-networkPolicy:
-  enabled: true
-  allowFromNamespaces:      # 이 네임스페이스에서 오는 트래픽만 허용
-    - ingress-nginx         # 외부 진입 통로
-    - backend               # 백엔드 서비스끼리
+  maxUnavailable: 1     # 최대 1개까지만 동시에 내려라             
 
 # 모든 서비스 공통 포트 (쿠버네티스는 파드 격리라 통일 가능)
 serverPort: 8080
@@ -66,12 +56,12 @@ redis:
   secretName: redis-credentials
   passwordKey: password
 
+# NetworkPolicy (네트워크 방화벽) 설정
 networkPolicy:
   enabled: true
-  allowFromNamespaces:
-    - ingress-nginx
-    - backend
-    - dev
+  allowFromNamespaces:      # 내부 파드 간 통신 허용
+    - backend               # 백엔드 서비스 상호 호출
+    - dev                   # dev 네임스페이스(SwaggerUI, AI 등) 호출 허용
   allowFromCidrs:
     # 1. ALB 퍼블릭 서브넷 (외부 Ingress 트래픽 수신용)
     - 172.31.0.0/20
