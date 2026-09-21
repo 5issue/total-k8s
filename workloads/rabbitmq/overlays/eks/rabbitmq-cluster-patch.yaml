@@ -15,19 +15,20 @@
 - op: add
   path: /spec/affinity
   value:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: eks.amazonaws.com/capacityType
-                operator: In
-                values:
-                  - ON_DEMAND
-          - matchExpressions:
-              - key: karpenter.sh/capacity-type
-                operator: In
-                values:
-                  - on-demand
+    # TEMP: deployment ordering 적용 전 RabbitMQ Pending 방지를 위해 OD 강제 일시 해제
+    # nodeAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #     nodeSelectorTerms:
+    #       - matchExpressions:
+    #           - key: eks.amazonaws.com/capacityType
+    #             operator: In
+    #             values:
+    #               - ON_DEMAND
+    #       - matchExpressions:
+    #           - key: karpenter.sh/capacity-type
+    #             operator: In
+    #             values:
+    #               - on-demand
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
         - weight: 100
