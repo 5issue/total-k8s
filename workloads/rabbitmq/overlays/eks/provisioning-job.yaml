@@ -2,9 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: rabbitmq-application-provisioning
-  # RabbitMQ Cluster, CA trust, application credential 준비 후 실행하는 provisioning Job입니다.
-  # Argo CD Hook 등 실제 실행 및 배포 방식은 GitOps 구성에서 결정합니다.
   namespace: messaging
+  annotations:
+    # 이전 실행 상태와 관계없이 Application Identity를 다시 수렴할 수 있도록
+    # Argo CD sync 시 멱등한 provisioning Job을 재생성합니다.
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
   labels:
     app.kubernetes.io/name: rabbitmq-provisioner
     app.kubernetes.io/component: credential-provisioning
