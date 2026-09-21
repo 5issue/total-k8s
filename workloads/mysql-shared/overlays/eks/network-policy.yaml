@@ -5,7 +5,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: shared-mysql
+      app.kubernetes.io/instance: shared-mysql
   policyTypes:
     - Ingress
   ingress:
