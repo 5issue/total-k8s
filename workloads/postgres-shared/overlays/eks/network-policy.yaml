@@ -9,6 +9,30 @@ spec:
   policyTypes:
     - Ingress
   ingress:
+    # ----------------------------------------------------
+    # dev 네임스페이스의 백엔드 서비스들 + AI 서빙 허용
+    # ----------------------------------------------------
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dev
+          podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - product-service
+                  - wms-service
+                  - scm-service
+                  - oms-service
+                  - kurly-ai-serving
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # ----------------------------------------------------
+    # backend 네임스페이스 내부 서비스들 허용 (기존 유지 + kurly-ai 추가)
+    # ----------------------------------------------------
     - from:
         - podSelector:
             matchLabels:
@@ -22,9 +46,16 @@ spec:
         - podSelector:
             matchLabels:
               app: oms-service
+        - podSelector:
+            matchLabels:
+              app: kurly-ai-serving
       ports:
         - protocol: TCP
           port: 5432
+
+    # ----------------------------------------------------
+    # DB 마이그레이션 잡 허용 (기존 유지)
+    # ----------------------------------------------------
     - from:
         - podSelector:
             matchLabels:
@@ -32,6 +63,10 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+
+    # ----------------------------------------------------
+    # CNPG 클러스터 내부 복제 통신 허용 (기존 유지)
+    # ----------------------------------------------------
     - from:
         - podSelector:
             matchLabels:
@@ -39,6 +74,10 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+
+    # ----------------------------------------------------
+    # CNPG 시스템 컨트롤러 허용 (기존 유지)
+    # ----------------------------------------------------
     - from:
         - namespaceSelector:
             matchLabels:
@@ -48,6 +87,10 @@ spec:
           port: 5432
         - protocol: TCP
           port: 9187
+
+    # ----------------------------------------------------
+    # Prometheus 메트릭 수집 허용 (기존 유지)
+    # ----------------------------------------------------
     - from:
         - namespaceSelector:
             matchLabels:
