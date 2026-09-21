@@ -13,3 +13,9 @@ database:
   secretName: shared-pg-product-service-credentials   # 서비스별 Secret
   username: product_user                                # PostgreSQL은 username key 있음
   passwordKey: password
+
+serviceAccount:
+  create: true
+  name: product-sa
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/product-service-irsa

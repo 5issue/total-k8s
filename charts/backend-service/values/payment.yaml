@@ -12,3 +12,9 @@ database:
   secretName: shared-mysql-accounts          # MySQL 공용 Secret
   username: payment_user                       # MySQL username key는 확인 필요
   passwordKey: payment_service_password         
+
+serviceAccount:
+  create: true
+  name: payment-sa
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/payment-service-irsa

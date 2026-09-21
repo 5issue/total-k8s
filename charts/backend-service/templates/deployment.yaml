@@ -27,6 +27,9 @@ spec:
           labelSelector:
             matchLabels:
               app: {{ .Values.serviceName }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- end }}
       containers:
         - name: {{ .Values.serviceName }}
           # 이미지 주소 = 레지스트리/이미지이름:태그 (세 값 조합)

@@ -37,3 +37,9 @@ networkPolicy:
     - dev       # dev 네임스페이스 내부 파드 통신 허용
   # allowFromCidrs는 아예 적지 않거나 비워둠 (ALB/외부 Ingress 원천 차단)
   allowFromCidrs: []
+
+serviceAccount:
+  create: true
+  name: ai-sa
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/ai-service-irsa

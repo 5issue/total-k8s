@@ -70,3 +70,9 @@ networkPolicy:
     - 172.31.48.0/20
     # 2. 내부 프라이빗 대역 (노드/파드 VPC 내부 통신용)
     - 10.0.0.0/16
+
+# 기본값은 꺼둠
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}

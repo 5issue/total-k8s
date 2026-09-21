@@ -11,3 +11,9 @@ database:
   secretName: shared-mysql-accounts          # MySQL 공용 Secret
   username: user_user                       # MySQL username key는확인 필요
   passwordKey: member_service_password
+
+serviceAccount:
+  create: true
+  name: user-sa
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/user-service-irsa 

@@ -12,3 +12,9 @@ database:
   username: oms_user
   passwordKey: password
 springProfile: prod
+
+serviceAccount:
+  create: true
+  name: oms-sa
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/oms-service-irsa 

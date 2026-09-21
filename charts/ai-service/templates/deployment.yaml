@@ -25,6 +25,9 @@ spec:
           labelSelector:
             matchLabels:
               app: {{ .Values.serviceName }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- end }}
       containers:
         - name: {{ .Values.serviceName }}
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
