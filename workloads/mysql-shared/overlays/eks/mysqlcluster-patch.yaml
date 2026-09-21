@@ -9,7 +9,7 @@
       whenUnsatisfiable: ScheduleAnyway
       labelSelector:
         matchLabels:
-          app.kubernetes.io/name: shared-mysql
+          app.kubernetes.io/instance: shared-mysql
 - op: add
   path: /spec/podTemplate/spec/affinity
   value:

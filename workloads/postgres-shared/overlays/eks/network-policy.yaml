@@ -5,7 +5,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: shared-pg
+      cnpg.io/cluster: shared-pg
   policyTypes:
     - Ingress
   ingress:

@@ -1,4 +1,7 @@
 - op: add
+  path: /spec/enableSuperuserAccess
+  value: true
+- op: add
   path: /spec/postgresql
   value:
     shared_preload_libraries:
