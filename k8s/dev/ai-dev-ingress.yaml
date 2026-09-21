@@ -20,7 +20,7 @@ metadata:
           "type": "url-rewrite",
           "urlRewriteConfig": {
             "rewrites": [
-              { "regex": "^/api/v1/ai/v3/api-docs$", "replace": "/openapi.json" }
+              { "regex": "^/api/v1/ai/v3/api-docs", "replace": "/openapi.json" }
             ]
           }
         }
