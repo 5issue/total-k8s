@@ -2,6 +2,7 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: shared-pg
+  namespace: backend
   labels:
     app.kubernetes.io/name: shared-pg
     app.kubernetes.io/component: database
