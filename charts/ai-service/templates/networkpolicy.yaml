@@ -20,7 +20,7 @@ spec:
         {{- range .Values.networkPolicy.allowFromNamespaces }}   {{/* 허용 목록 반복 */}}
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: {{ . }}   # 예: ingress-nginx, backend
+              kubernetes.io/metadata.name: {{ . }}   # backend, dev
         {{- end }}
 
         {{/* 추가: ALB 서브넷 CIDR 허용 */}}
