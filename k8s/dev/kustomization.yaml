@@ -8,7 +8,7 @@ namespace: dev
 resources:
   - ../frontend
   - dev-ingress.yaml
-  - ai-dev-ingress.
+  - ai-dev-ingress
   - swagger-docs-router.yaml
   - swagger-auth-ingress.yaml
 
