@@ -6,9 +6,11 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/argoproj/argo-rollouts'
-    targetRevision: v1.7.2
-    path: manifests/install
+    repoURL: 'https://argoproj.github.io/argo-rollouts'
+    chart: argo-rollouts
+    targetRevision: 2.37.2
+    helm:
+      releaseName: argo-rollouts
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: argo-rollouts
