@@ -22,3 +22,5 @@ data:
           # Organization 단위 로그인 제한
           orgs:
             - name: "5issue"
+              teams:
+                - infra

@@ -12,8 +12,4 @@ data:
   policy.default: role:readonly
   policy.csv: |
     # 팀원들 깃허브 ID에 관리자 권한 부여
-    g, yimjongwon, role:admin
-    g, evertonian19, role:admin
-    g, KTCLIF, role:admin
-    g, parkyhun, role:admin
-    g, kmkben0615, role:admin
+    g, 5issue:infra, role:admin
