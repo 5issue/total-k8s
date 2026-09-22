@@ -3,6 +3,9 @@ serviceName: wms-service        # 이 서비스 이름
 image:
   repository: kurly-wms              # ECR 창고 이름
 
+rabbitmq:
+  credentialsSecretName: rabbitmq-wms-credentials
+
 
 database:
   type: postgresql

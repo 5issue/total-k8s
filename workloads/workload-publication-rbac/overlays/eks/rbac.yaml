@@ -35,11 +35,17 @@ rules:
     resourceNames:
       - rabbitmq-ca-signing
       - rabbitmq-ca
+      - rabbitmq-app-credentials
+      - rabbitmq-wms-credentials
+      - rabbitmq-oms-credentials
     verbs: ["get"]
   - apiGroups: [""]
     resources: ["secrets"]
     resourceNames:
       - rabbitmq-ca
+      - rabbitmq-app-credentials
+      - rabbitmq-wms-credentials
+      - rabbitmq-oms-credentials
     verbs: ["patch"]
   - apiGroups: [""]
     resources: ["secrets"]
@@ -69,6 +75,9 @@ rules:
     resources: ["secrets"]
     resourceNames:
       - rabbitmq-ca
+      - rabbitmq-app-credentials
+      - rabbitmq-wms-credentials
+      - rabbitmq-oms-credentials
       - redis-credentials
     verbs: ["get", "patch"]
   - apiGroups: [""]
@@ -99,6 +108,9 @@ rules:
     resources: ["secrets"]
     resourceNames:
       - rabbitmq-ca
+      - rabbitmq-app-credentials
+      - rabbitmq-wms-credentials
+      - rabbitmq-oms-credentials
       - redis-credentials
     verbs: ["get", "patch"]
   - apiGroups: [""]
