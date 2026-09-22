@@ -36,7 +36,8 @@ networkPolicy:
     - backend   # 백엔드 마이크로서비스에서 AI 호출 허용
     - dev       # dev 네임스페이스 내부 파드 통신 허용
   # allowFromCidrs는 아예 적지 않거나 비워둠 (ALB/외부 Ingress 원천 차단)
-  allowFromCidrs: []
+  allowFromCidrs:
+    - "10.0.0.0/16"   # ALB가 위치한 VPC 서브넷 대역
 
 serviceAccount:
   create: true
