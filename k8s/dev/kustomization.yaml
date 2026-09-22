@@ -11,4 +11,5 @@ resources:
   - ai-dev-ingress.yaml
   - swagger-docs-router.yaml
   - swagger-auth-ingress.yaml
+  - swagger-docs-networkpolicy.yaml
 
