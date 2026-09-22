@@ -2,7 +2,10 @@
 serviceName: oms-service
 image:
   repository: kurly-oms
-  
+
+rabbitmq:
+  credentialsSecretName: rabbitmq-oms-credentials
+
 database:
   type: postgresql
   host: shared-pg-rw.backend.svc.cluster.local
@@ -17,4 +20,4 @@ serviceAccount:
   create: true
   name: oms-sa
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/oms-service-irsa 
+    eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/oms-service-irsa

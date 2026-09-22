@@ -9,7 +9,6 @@ data:
   provision.py: |
     import base64
     import json
-    import os
     import ssl
     import sys
     import time
@@ -19,10 +18,49 @@ data:
 
 
     MANAGEMENT_URL = "https://rabbitmq.messaging.svc.cluster.local:15671"
-    APPLICATION_USERNAME = "total-backend"
     APPLICATION_VHOST = "total-prod"
     READINESS_TIMEOUT_SECONDS = 600
     RETRY_SECONDS = 5
+    IDENTITY_CONTRACTS = (
+        {
+            "name": "backend",
+            "username": "total-backend",
+            "secret_path": "/var/run/rabbitmq-secrets/application",
+            "permissions": {"configure": ".*", "write": ".*", "read": ".*"},
+        },
+        {
+            "name": "wms",
+            "username": "total-wms",
+            "secret_path": "/var/run/rabbitmq-secrets/wms",
+            "permissions": {
+                "configure": r"^wms\.topic\.exchange$",
+                "write": r"^wms\.topic\.exchange$",
+                "read": r"^$",
+            },
+        },
+        {
+            "name": "oms",
+            "username": "total-oms",
+            "secret_path": "/var/run/rabbitmq-secrets/oms",
+            "permissions": {
+                "configure": (
+                    r"^(oms\.topic\.exchange|oms\."
+                    r"(order-payment-completed|return-requested|wms-inspected|payment-refunded)"
+                    r"\.(queue|dlq))$"
+                ),
+                "write": (
+                    r"^(amq\.default|oms\.topic\.exchange|oms\."
+                    r"(order-payment-completed|return-requested|wms-inspected|payment-refunded)"
+                    r"\.queue)$"
+                ),
+                "read": (
+                    r"^(order\.topic\.exchange|oms\.topic\.exchange|oms\."
+                    r"(order-payment-completed|return-requested|wms-inspected|payment-refunded)"
+                    r"\.queue)$"
+                ),
+            },
+        },
+    )
 
 
     def read_secret(path, label):
@@ -64,6 +102,70 @@ data:
             raise RuntimeError(f"{method} {resource} failed") from None
 
 
+    def load_identity(contract):
+        username = read_secret(
+            f"{contract['secret_path']}/username",
+            f"{contract['name']} identity username",
+        )
+        password = read_secret(
+            f"{contract['secret_path']}/password",
+            f"{contract['name']} identity password",
+        )
+        if username != contract["username"]:
+            raise RuntimeError(
+                f"{contract['name']} identity username does not match the infrastructure contract"
+            )
+        return {**contract, "password": password}
+
+
+    def reconcile_identity(identity, encoded_vhost, basic_token, tls_context):
+        encoded_username = urllib.parse.quote(identity["username"], safe="")
+        try:
+            api_request(
+                "PUT",
+                f"/api/users/{encoded_username}",
+                basic_token,
+                tls_context,
+                {"password": identity["password"], "tags": ""},
+            )
+            api_request(
+                "PUT",
+                f"/api/permissions/{encoded_vhost}/{encoded_username}",
+                basic_token,
+                tls_context,
+                identity["permissions"],
+            )
+
+            user = api_request(
+                "GET", f"/api/users/{encoded_username}", basic_token, tls_context
+            )
+            permissions = api_request(
+                "GET",
+                f"/api/permissions/{encoded_vhost}/{encoded_username}",
+                basic_token,
+                tls_context,
+            )
+
+            if not isinstance(user, dict) or user.get("name") != identity["username"]:
+                raise RuntimeError("user verification failed")
+            if user.get("tags") not in (None, "", []):
+                raise RuntimeError("user unexpectedly has management tags")
+            if not isinstance(permissions, dict) or any(
+                permissions.get(key) != value
+                for key, value in identity["permissions"].items()
+            ):
+                raise RuntimeError("permission verification failed")
+        except RuntimeError as error:
+            raise RuntimeError(
+                f"{identity['name']} identity reconciliation failed: {error}"
+            ) from error
+
+        print(
+            f"Reconciled and verified {identity['name']} identity "
+            f"{identity['username']} in {APPLICATION_VHOST} without management tags"
+        )
+
+
     def main():
         bootstrap_username = read_secret(
             "/var/run/rabbitmq-secrets/bootstrap/username", "bootstrap username"
@@ -71,17 +173,7 @@ data:
         bootstrap_password = read_secret(
             "/var/run/rabbitmq-secrets/bootstrap/password", "bootstrap password"
         )
-        application_username = read_secret(
-            "/var/run/rabbitmq-secrets/application/username", "application username"
-        )
-        application_password = read_secret(
-            "/var/run/rabbitmq-secrets/application/password", "application password"
-        )
-
-        if application_username != APPLICATION_USERNAME:
-            raise RuntimeError(
-                "application username does not match the infrastructure contract"
-            )
+        identities = [load_identity(contract) for contract in IDENTITY_CONTRACTS]
 
         tls_context = ssl.create_default_context(
             cafile="/var/run/rabbitmq-secrets/ca/ca.crt"
@@ -106,60 +198,19 @@ data:
                 time.sleep(RETRY_SECONDS)
 
         encoded_vhost = urllib.parse.quote(APPLICATION_VHOST, safe="")
-        encoded_username = urllib.parse.quote(APPLICATION_USERNAME, safe="")
 
         api_request("PUT", f"/api/vhosts/{encoded_vhost}", basic_token, tls_context, {})
-        print(f"Reconciled vhost {APPLICATION_VHOST}")
-
-        api_request(
-            "PUT",
-            f"/api/users/{encoded_username}",
-            basic_token,
-            tls_context,
-            {"password": application_password, "tags": ""},
-        )
-        print(
-            f"Reconciled application user {APPLICATION_USERNAME} without management tags"
-        )
-
-        expected_permissions = {"configure": ".*", "write": ".*", "read": ".*"}
-        api_request(
-            "PUT",
-            f"/api/permissions/{encoded_vhost}/{encoded_username}",
-            basic_token,
-            tls_context,
-            expected_permissions,
-        )
-        print(
-            f"Reconciled permissions for {APPLICATION_USERNAME} in {APPLICATION_VHOST}"
-        )
-
         vhost = api_request(
             "GET", f"/api/vhosts/{encoded_vhost}", basic_token, tls_context
         )
-        user = api_request(
-            "GET", f"/api/users/{encoded_username}", basic_token, tls_context
-        )
-        permissions = api_request(
-            "GET",
-            f"/api/permissions/{encoded_vhost}/{encoded_username}",
-            basic_token,
-            tls_context,
-        )
-
         if not isinstance(vhost, dict) or vhost.get("name") != APPLICATION_VHOST:
             raise RuntimeError("vhost verification failed")
-        if not isinstance(user, dict) or user.get("name") != APPLICATION_USERNAME:
-            raise RuntimeError("application user verification failed")
-        if user.get("tags") not in (None, "", []):
-            raise RuntimeError("application user unexpectedly has management tags")
-        if not isinstance(permissions, dict) or any(
-            permissions.get(key) != value
-            for key, value in expected_permissions.items()
-        ):
-            raise RuntimeError("application permission verification failed")
+        print(f"Reconciled and verified vhost {APPLICATION_VHOST}")
 
-        print("RabbitMQ application identity provisioning verified")
+        for identity in identities:
+            reconcile_identity(identity, encoded_vhost, basic_token, tls_context)
+
+        print("RabbitMQ application identity provisioning verified for all identities")
 
 
     if __name__ == "__main__":

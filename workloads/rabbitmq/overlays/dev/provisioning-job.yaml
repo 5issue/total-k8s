@@ -65,6 +65,12 @@ spec:
             - name: application-credentials
               mountPath: /var/run/rabbitmq-secrets/application
               readOnly: true
+            - name: wms-credentials
+              mountPath: /var/run/rabbitmq-secrets/wms
+              readOnly: true
+            - name: oms-credentials
+              mountPath: /var/run/rabbitmq-secrets/oms
+              readOnly: true
             - name: ca-trust
               mountPath: /var/run/rabbitmq-secrets/ca
               readOnly: true
@@ -87,6 +93,24 @@ spec:
         - name: application-credentials
           secret:
             secretName: rabbitmq-app-credentials
+            defaultMode: 0440
+            items:
+              - key: username
+                path: username
+              - key: password
+                path: password
+        - name: wms-credentials
+          secret:
+            secretName: rabbitmq-wms-credentials
+            defaultMode: 0440
+            items:
+              - key: username
+                path: username
+              - key: password
+                path: password
+        - name: oms-credentials
+          secret:
+            secretName: rabbitmq-oms-credentials
             defaultMode: 0440
             items:
               - key: username
