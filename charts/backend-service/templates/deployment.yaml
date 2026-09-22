@@ -49,10 +49,6 @@ spec:
               value: "{{ .Values.rabbitmq.sslEnabled }}"    # true
             - name: RABBITMQ_SSL_CERT_PATH
               value: "{{ .Values.rabbitmq.sslCertPath }}"
-            - name: SPRING_RABBITMQ_SSL_VERIFY_HOSTNAME
-              value: "false"
-            - name: SPRING_RABBITMQ_SSL_VALIDATE_SERVER_CERTIFICATE
-              value: "false"
             # DB 접속 정보 (values의 database 블록에서 가져옴)
             - name: SPRING_PROFILES_ACTIVE
               value: "{{ .Values.springProfile | default "local" }}"
