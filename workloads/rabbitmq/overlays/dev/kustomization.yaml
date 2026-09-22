@@ -3,14 +3,15 @@ kind: Kustomization
 
 namespace: dev
 
+# Dev Backend는 messaging Namespace의 RabbitMQ를 공유합니다. 이 standalone overlay는
+# Application Identity provisioning을 실행하지 않습니다.
 resources:
   - ../../base
   - namespace.yaml
   - network-policy.yaml
-  - provisioning-job.yaml
   - rabbitmq-tls.yaml
   - service-monitor.yaml
- 
+
 patches:
   - path: rabbitmq-cluster-patch.yaml
     target:

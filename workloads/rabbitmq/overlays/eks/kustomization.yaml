@@ -10,7 +10,6 @@ resources:
   - namespace.yaml
   - network-policy.yaml
   - prometheus-rule.yaml
-  - provisioning-job.yaml
   - service-monitor.yaml
 
 patches:
