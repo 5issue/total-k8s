@@ -134,6 +134,42 @@ Provisioning을 수행합니다.
 
 ## 4. Application Identity Provisioning
 
+RabbitMQ 기반 리소스는 자동 동기화되는 `rabbitmq-app`이 관리합니다. Provisioning
+Job은 기반 리소스와 외부 publication이 모두 준비된 뒤에만 실행되도록 별도의
+`rabbitmq-provisioning-app`에서 관리하며, 이 Application에는 automated sync를
+설정하지 않습니다.
+
+Fresh EKS에서는 다음 순서로 진행합니다.
+
+1. addons와 `rabbitmq-app`을 정상화합니다.
+2. `rabbitmq-ca-signing`, `rabbitmq-server-tls`, `RabbitmqCluster/rabbitmq`와
+   `messaging/rabbitmq-default-user`가 준비됐는지 확인합니다.
+3. [TRUST-PUBLICATION-RUNBOOK.md](TRUST-PUBLICATION-RUNBOOK.md)에 따라 CA trust를
+   publication합니다.
+4. `total-infra`의 Backend/WMS/OMS publish target을 각각 실행한 뒤 verify target으로
+   동일 source version publication을 확인합니다.
+5. `messaging` Namespace에서 다음 Secret이 존재하고 Provisioning이 요구하는 key를
+   제공하는지 확인합니다.
+   - `rabbitmq-default-user`: `username`, `password`
+   - `rabbitmq-ca`: `ca.crt`
+   - `rabbitmq-app-credentials`: `username`, `password`
+   - `rabbitmq-wms-credentials`: `username`, `password`
+   - `rabbitmq-oms-credentials`: `username`, `password`
+6. Argo CD에서 `rabbitmq-provisioning-app`을 수동 sync합니다. CLI를 사용하는 경우
+   다음과 같습니다.
+
+   ```text
+   argocd app sync rabbitmq-provisioning-app
+   ```
+
+7. `rabbitmq-application-provisioning` Job이 `Complete`인지 확인합니다.
+8. `total-prod` vhost, 세 Application user와 각 permission이 이 문서의 계약과
+   일치하는지 확인합니다.
+
+`rabbitmq-provisioning-app`의 Job에는 `Force=true,Replace=true`가 유지됩니다. 따라서
+credential 갱신이나 복구 시 운영자가 Application을 다시 수동 sync하면 완료된 동일
+이름 Job을 재생성하고 멱등 provisioning을 다시 수행합니다.
+
 Provisioning Job은 다음 Secret을 읽습니다.
 
 | Secret | Mount path | Expected username |
@@ -183,8 +219,8 @@ source version을 기준으로 RabbitMQ와 Backend를 갱신합니다.
    반영합니다.
 3. `make rabbitmq-credential-verify`로 세 Secret의 source VersionId와 key schema가
    일치하는지 확인합니다.
-4. Provisioning Job을 실행해 RabbitMQ의 `total-backend` credential과 permission을
-   수렴합니다.
+4. `rabbitmq-provisioning-app`을 수동 sync해 RabbitMQ의 `total-backend` credential과
+   permission을 수렴합니다.
 5. RabbitMQ의 user/vhost/permission 상태를 확인합니다.
 6. Backend가 새로운 credential을 사용하도록 재연결하거나 rollout합니다.
 7. Backend의 AMQPS 인증과 publish/consume을 확인합니다.
@@ -211,9 +247,9 @@ Secrets Manager의 현재 `AWSCURRENT` credential version을 기준으로 복구
 3. `make rabbitmq-credential-verify`로 세 Secret의 source VersionId 일치 여부를
    확인합니다.
 4. RabbitMQ TLS와 Management API `15671` 접근 상태를 확인합니다.
-5. Provisioning Job을 실행해 `total-prod` vhost와 세 Application user 및
-   permission을 계약 상태로 구성합니다. 실행 전 WMS/OMS credential Secret도
-   준비되어 있어야 합니다.
+5. `rabbitmq-provisioning-app`을 수동 sync해 `total-prod` vhost와 세 Application
+   user 및 permission을 계약 상태로 구성합니다. 실행 전 WMS/OMS credential
+   Secret도 준비되어 있어야 합니다.
 6. RabbitMQ의 user/vhost/permission 상태를 확인합니다.
 7. 해당 Backend가 현재 credential을 사용하도록 재연결하거나 rollout합니다.
 8. Backend의 AMQPS 인증과 필요한 publish/consume을 확인합니다.
