@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-oauth2-proxy
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://oauth2-proxy.github.io/manifests
+    chart: oauth2-proxy
+    targetRevision: 10.7.0
+    helm:
+      releaseName: oauth2-proxy
+      valuesObject:
+        config:
+          existingSecret: oauth2-proxy-secrets
+          configFile: |-
+            email_domains = [ "*" ]
+            upstreams = [ "http://swagger-docs-router.dev.svc.cluster.local:8080/" ]
+            http_address = "0.0.0.0:4180"
+            reverse_proxy = true
+
+            # GitHub Provider 설정
+            provider = "github"
+            scope = "read:user user:email read:org"
+
+            # 5issue 조직 내 5개 팀 전체 허용
+            github_org = "5issue"
+            github_team = "infra,backend,frontend,ai,security"
+
+            redirect_url = "https://dev.cloudyim.store/oauth2/callback"
+            skip_provider_button = true
+
+            # 쿠키 설정
+            cookie_name = "_oauth2_proxy_dev_swagger"
+            cookie_secure = true
+            cookie_httponly = true
+            cookie_samesite = "lax"
+            cookie_path = "/"
+            whitelist_domains = [ "dev.cloudyim.store" ]
+
+            pass_access_token = false
+            pass_authorization_header = false
+            pass_basic_auth = false
+        ingress:
+          enabled: false
+        replicaCount: 1
+        service:
+          type: ClusterIP
+          portNumber: 4180
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
