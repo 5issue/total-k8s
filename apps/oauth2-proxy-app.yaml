@@ -39,6 +39,7 @@ spec:
             cookie_httponly = true
             cookie_samesite = "lax"
             cookie_path = "/"
+            cookie_expire = "30s"
             whitelist_domains = [ "dev.cloudyim.store" ]
 
             pass_access_token = false
