@@ -124,7 +124,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "count(count by (node) (kube_node_labels{label_karpenter_sh_capacity_type=\"spot\"} or kube_node_labels{label_eks_amazonaws_com_capacityType=\"SPOT\"}))",
+          "expr": "count(count by (node) (kube_node_labels{label_karpenter_sh_capacity_type=\"spot\"} or kube_node_labels{label_eks_amazonaws_com_capacity_type=\"SPOT\"}))",
           "instant": true,
           "legendFormat": "Spot",
           "range": false,
@@ -166,7 +166,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "count(count by (node) (kube_node_labels{label_karpenter_sh_capacity_type=\"on-demand\"} or kube_node_labels{label_eks_amazonaws_com_capacityType=\"ON_DEMAND\"}))",
+          "expr": "count(count by (node) (kube_node_labels{label_karpenter_sh_capacity_type=\"on-demand\"} or kube_node_labels{label_eks_amazonaws_com_capacity_type=\"ON_DEMAND\"}))",
           "instant": true,
           "legendFormat": "On-Demand",
           "range": false,
