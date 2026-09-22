@@ -47,7 +47,6 @@
   path: /spec/tls
   value:
     secretName: rabbitmq-server-tls
-    caSecretName: rabbitmq-ca
     disableNonTLSListeners: true
 - op: add
   path: /spec/terminationGracePeriodSeconds
