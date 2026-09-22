@@ -33,8 +33,18 @@ OMS Read:
 ^(order\.topic\.exchange|oms\.topic\.exchange|oms\.(order-payment-completed|return-requested|wms-inspected|payment-refunded)\.queue)$
 ```
 
-일반 permission은 routing key가 아니라 exchange와 queue 이름에 적용합니다. 이
-구성은 topic permission을 생성하지 않습니다. `amq.default` write는 OMS primary
+WMS Topic Permission:
+
+| 항목 | 값 |
+| --- | --- |
+| Vhost | `total-prod` |
+| Exchange | `wms.topic.exchange` |
+| Write routing key | `^wms\.return\.inspected$` |
+| Read routing key | `^$` |
+
+일반 permission은 routing key가 아니라 exchange와 queue 이름에 적용합니다. 공용
+`wms.topic.exchange`에 대한 WMS 발행 범위는 별도 topic permission으로 제한합니다.
+OMS에는 topic permission을 추가하지 않습니다. `amq.default` write는 OMS primary
 queue가 default exchange를 DLX로 사용하는 현재 애플리케이션 계약에 필요합니다.
 
 `rabbitmq-default-user`는 Application Identity Provisioning을 위한 bootstrap
@@ -63,11 +73,13 @@ version을 기준으로 다음 Namespace의 같은 이름 Kubernetes Secret에 �
 - WMS: `rabbitmq-wms-credentials`
 - OMS: `rabbitmq-oms-credentials`
 
-현재 `total-infra`에 구현된 `rabbitmq-credential-publish`와
-`rabbitmq-credential-verify`는 `total-backend`의
-`prod/total/rabbitmq-app-credentials`만 대상으로 합니다. WMS/OMS용 Secrets
-Manager resource, publication 구현 및 운영 명령은 `total-infra`에 구현되기 전까지
-이 Runbook에서 정의하지 않습니다.
+`total-infra`는 Backend, WMS, OMS에 대해 다음 publish/verify target을 제공합니다.
+
+| Identity | Publish | Verify |
+| --- | --- | --- |
+| Backend | `make rabbitmq-credential-publish` | `make rabbitmq-credential-verify` |
+| WMS | `make rabbitmq-wms-credential-publish` | `make rabbitmq-wms-credential-verify` |
+| OMS | `make rabbitmq-oms-credential-publish` | `make rabbitmq-oms-credential-verify` |
 
 ## 3. 초기 구성
 
@@ -107,9 +119,8 @@ VersionId를 기준으로 다음 세 Secret을 publication하고 즉시 검증�
 기록된 source VersionId가 서로 같은지 검증하며 AWS의 `AWSCURRENT`를 다시
 resolve하지 않습니다.
 
-WMS/OMS는 각 credential의 Secrets Manager 및 publication 구현이 준비된 후 같은
-책임 경계와 동일 source version 계약을 따라야 합니다. 존재하지 않는 WMS/OMS용
-Make target을 대신 사용하지 않습니다.
+WMS/OMS도 각 전용 target으로 같은 책임 경계와 동일 source version 계약을
+따릅니다. 실제 credential 값과 SecretVersion 준비는 별도 승인된 운영 절차입니다.
 
 이후 RabbitMQ Cluster와 다음 리소스가 준비된 상태에서 Application Identity
 Provisioning을 수행합니다.
@@ -137,7 +148,8 @@ Provisioning Job은 RabbitMQ Management API를 통해 다음 상태를 멱등 �
 2. 각 Secret의 username이 Identity 계약과 일치하는지 검증합니다.
 3. 세 user를 management tag 없이 생성하거나 현재 password로 수렴합니다.
 4. 각 user의 `total-prod` Configure / Write / Read permission을 PUT합니다.
-5. user와 permission을 GET하여 username, tag, permission 정합성을 검증합니다.
+5. WMS의 `wms.topic.exchange` topic permission을 PUT합니다.
+6. user, permission과 WMS topic permission을 GET하여 실제 적용값을 검증합니다.
 
 Management API endpoint:
 
@@ -177,9 +189,7 @@ source version을 기준으로 RabbitMQ와 Backend를 갱신합니다.
 6. Backend가 새로운 credential을 사용하도록 재연결하거나 rollout합니다.
 7. Backend의 AMQPS 인증과 publish/consume을 확인합니다.
 
-WMS/OMS도 publication 구현이 준비되면 대상 identity별로 같은 순서를 수행하되,
-현재 존재하는 `total-backend` 전용 Make target을 WMS/OMS publication 명령으로
-간주하지 않습니다.
+WMS/OMS도 대상 identity별 전용 publish/verify target으로 같은 순서를 수행합니다.
 
 credential 갱신 중에는 Kubernetes Secret과 RabbitMQ user credential 사이에
 일시적인 불일치 구간이 발생할 수 있습니다. publication 이후 Provisioning과 해당
@@ -250,6 +260,10 @@ Validation과 `rabbitmq.messaging.svc.cluster.local` 기준 Hostname Verificatio
 
 Application Identity 구성 후 다음 상태를 확인합니다.
 
+보안팀의 Management API 점검은 임시 관리자 계정과 `kubectl port-forward`를
+사용하는 수동 절차로 수행합니다. 상시 Management API 외부 노출이나 monitoring/audit
+계정은 이 구현 범위에 포함하지 않습니다.
+
 ### RabbitMQ
 
 - `total-prod` vhost
@@ -260,9 +274,11 @@ Application Identity 구성 후 다음 상태를 확인합니다.
 ### 최소 권한
 
 - WMS는 `wms.topic.exchange` 선언과 발행만 가능
+- WMS는 `wms.topic.exchange`에서 routing key `wms.return.inspected`만 발행 가능
+- WMS topic permission의 read routing key는 `^$`
 - OMS는 계약에 포함된 exchange/queue/DLQ 선언, binding, 발행 및 소비 가능
 - WMS/OMS는 계약 밖의 리소스를 선언, 발행 또는 소비할 수 없음
-- topic permission은 생성되지 않음
+- OMS에는 topic permission이 없음
 
 ### TLS
 

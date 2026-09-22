@@ -37,6 +37,11 @@ data:
                 "write": r"^wms\.topic\.exchange$",
                 "read": r"^$",
             },
+            "topic_permission": {
+                "exchange": "wms.topic.exchange",
+                "write": r"^wms\.return\.inspected$",
+                "read": r"^$",
+            },
         },
         {
             "name": "oms",
@@ -135,6 +140,15 @@ data:
                 tls_context,
                 identity["permissions"],
             )
+            expected_topic_permission = identity.get("topic_permission")
+            if expected_topic_permission is not None:
+                api_request(
+                    "PUT",
+                    f"/api/topic-permissions/{encoded_vhost}/{encoded_username}",
+                    basic_token,
+                    tls_context,
+                    expected_topic_permission,
+                )
 
             user = api_request(
                 "GET", f"/api/users/{encoded_username}", basic_token, tls_context
@@ -145,6 +159,15 @@ data:
                 basic_token,
                 tls_context,
             )
+            if expected_topic_permission is not None:
+                topic_permissions = api_request(
+                    "GET",
+                    f"/api/topic-permissions/{encoded_vhost}/{encoded_username}",
+                    basic_token,
+                    tls_context,
+                )
+            else:
+                topic_permissions = None
 
             if not isinstance(user, dict) or user.get("name") != identity["username"]:
                 raise RuntimeError("user verification failed")
@@ -155,6 +178,20 @@ data:
                 for key, value in identity["permissions"].items()
             ):
                 raise RuntimeError("permission verification failed")
+            if expected_topic_permission is not None:
+                if not isinstance(topic_permissions, list):
+                    raise RuntimeError("topic permission verification failed")
+                matching_topic_permissions = [
+                    permission
+                    for permission in topic_permissions
+                    if permission.get("exchange")
+                    == expected_topic_permission["exchange"]
+                ]
+                if len(matching_topic_permissions) != 1 or any(
+                    matching_topic_permissions[0].get(key) != value
+                    for key, value in expected_topic_permission.items()
+                ):
+                    raise RuntimeError("topic permission verification failed")
         except RuntimeError as error:
             raise RuntimeError(
                 f"{identity['name']} identity reconciliation failed: {error}"
