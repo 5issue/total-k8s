@@ -31,7 +31,7 @@ spec:
             github_team = "infra,backend,frontend,ai,security"
 
             redirect_url = "https://dev.cloudyim.store/oauth2/callback"
-            skip_provider_button = false
+            skip_provider_button = true
 
             # 쿠키 설정
             cookie_name = "_oauth2_proxy_dev_swagger"
@@ -39,8 +39,8 @@ spec:
             cookie_httponly = true
             cookie_samesite = "lax"
             cookie_path = "/"
-            cookie_expire = "30s"
-            cookie_refresh = "0"
+            # cookie_expire = "30s"
+            # cookie_refresh = "0"
             whitelist_domains = [ "dev.cloudyim.store" ]
 
             pass_access_token = false
