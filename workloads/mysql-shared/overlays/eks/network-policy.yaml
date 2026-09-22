@@ -36,7 +36,7 @@ spec:
       ports:
         - protocol: TCP
           port: 3306
-    # 백업 파드 허용 (기존 유지)
+    # 백업 파드 허용 
     - from:
         - podSelector:
             matchLabels:
@@ -45,7 +45,7 @@ spec:
       ports:
         - protocol: TCP
           port: 3306
-    # 계정 프로비저너 허용 (기존 유지)
+    # 계정 프로비저너 허용 
     - from:
         - podSelector:
             matchLabels:
@@ -53,3 +53,32 @@ spec:
       ports:
         - protocol: TCP
           port: 3306
+    # MOCO Controller Manager 통신 허용 (33062 관리 포트, 9080/8080 gRPC)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: moco-system
+      ports:
+        - protocol: TCP
+          port: 33062
+        - protocol: TCP
+          port: 9080
+        - protocol: TCP
+          port: 8080
+    # MySQL 파드 상호 간 복제 동기화 및 Kubelet Readiness/Liveness 프로브(9081) 통신 허용
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: shared-mysql
+      ports:
+        - protocol: TCP
+          port: 3306
+        - protocol: TCP
+          port: 33060
+        - protocol: TCP
+          port: 33062
+        - protocol: TCP
+          port: 9081
+    - ports:
+        - protocol: TCP
+          port: 9081  # Kubelet(노드 호스트)의 HTTP 헬스체크(/healthz, /readyz) 허용
