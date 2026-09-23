@@ -18,7 +18,7 @@ metadata:
       access_logs.s3.enabled=true,
       access_logs.s3.bucket=kurly-security-logs-ap-northeast-2,
       access_logs.s3.prefix=alb-logs,
-      deletion_protection.enabled=false,
+      deletion_protection.enabled=true,
       idle_timeout.timeout_seconds=60
 spec:
   ingressClassName: alb
