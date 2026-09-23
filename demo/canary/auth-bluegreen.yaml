@@ -1,18 +1,19 @@
-# 블루그린 배포 예제
-
+# 블루그린 배포 데모
+# 배포 전략 검증이 목적이라 기동이 빠른 경량 이미지(nginx)를 사용한다.
+# 시연: kubectl argo rollouts set image auth-bluegreen-demo demo=public.ecr.aws/nginx/nginx:1.27 -n backend
 
 apiVersion: argoproj.io/v1alpha1
-kind: Rollout                          # Deployment 대신 Rollout
+kind: Rollout
 metadata:
   name: auth-bluegreen-demo
   namespace: backend
 spec:
   replicas: 2
   strategy:
-    blueGreen:                         # 블루그린 방식
-      activeService: auth-bg-active    # 현재 운영(파랑) - 사용자가 여기 접속
-      previewService: auth-bg-preview  # 새 버전 미리보기(초록) - 테스트용
-      autoPromotionEnabled: false      # 수동 승인 후 전환 (자동 아님)
+    blueGreen:
+      activeService: auth-bg-active    # 파랑: 사용자 트래픽이 가는 곳
+      previewService: auth-bg-preview  # 초록: 새 버전 미리보기
+      autoPromotionEnabled: false      # 사람이 promote 해야 전환됨
   selector:
     matchLabels:
       app: auth-bluegreen-demo
@@ -22,10 +23,19 @@ spec:
         app: auth-bluegreen-demo
     spec:
       containers:
-        - name: auth
-          image: "596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-auth:latest"
+        - name: demo
+          image: public.ecr.aws/nginx/nginx:1.26   # v1 (시작 버전)
           ports:
-            - containerPort: 8080
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 3
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits:   { memory: 64Mi }
 ---
 # 파랑 Service (현재 운영 - 사용자 트래픽)
 apiVersion: v1
@@ -35,12 +45,12 @@ metadata:
   namespace: backend
 spec:
   selector:
-    app: auth-bluegreen-demo
+    app: auth-bluegreen-demo           # Argo Rollouts가 버전 구분 라벨을 자동으로 추가함
   ports:
-    - port: 8080
-      targetPort: 8080
+    - port: 80
+      targetPort: 80
 ---
-# 초록 Service (새 버전 미리보기 - 테스트용)
+# 초록 Service (새 버전 미리보기)
 apiVersion: v1
 kind: Service
 metadata:
@@ -50,5 +60,5 @@ spec:
   selector:
     app: auth-bluegreen-demo
   ports:
-    - port: 8080
-      targetPort: 8080
+    - port: 80
+      targetPort: 80
