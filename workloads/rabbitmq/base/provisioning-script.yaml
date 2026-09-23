@@ -143,6 +143,22 @@ data:
             )
             expected_topic_permission = identity.get("topic_permission")
             if expected_topic_permission is not None:
+                encoded_exchange = urllib.parse.quote(
+                    expected_topic_permission["exchange"], safe=""
+                )
+                api_request(
+                    "PUT",
+                    f"/api/exchanges/{encoded_vhost}/{encoded_exchange}",
+                    basic_token,
+                    tls_context,
+                    {
+                        "type": "topic",
+                        "durable": True,
+                        "auto_delete": False,
+                        "internal": False,
+                        "arguments": {},
+                    },
+                )
                 api_request(
                     "PUT",
                     f"/api/topic-permissions/{encoded_vhost}/{encoded_username}",
