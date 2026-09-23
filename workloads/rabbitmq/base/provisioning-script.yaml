@@ -207,6 +207,7 @@ data:
                 if len(matching_topic_permissions) != 1 or any(
                     matching_topic_permissions[0].get(key) != value
                     for key, value in expected_topic_permission.items()
+                    if key != "configure"
                 ):
                     raise RuntimeError("topic permission verification failed")
         except RuntimeError as error:
