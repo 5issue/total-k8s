@@ -19,3 +19,13 @@ serviceAccount:
     eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/auth-service-irsa 
 
 userServiceBaseUrl: "http://user-service.backend.svc.cluster.local:8080"
+
+# Auth Service 전용 필수 설정값
+authConfig:
+  jwtKmsKeyId: "alias/auth-jwt-sign-key"
+  redirectUriKakao: "https://api.cloudyim.store/api/v1/auth/oauth/kakao/callback"
+  redirectUriNaver: "https://api.cloudyim.store/api/v1/auth/oauth/naver/callback"
+  allowedRedirectUris: "https://cloudyim.store,https://api.cloudyim.store/api/v1/auth/oauth/kakao/callback,https://api.cloudyim.store/api/v1/auth/oauth/naver/callback"
+  frontendRedirectUri: "https://cloudyim.store/oauth/callback"
+  kakaoClientId: "dummy-kakao-client-id"
+  naverClientId: "dummy-naver-client-id"

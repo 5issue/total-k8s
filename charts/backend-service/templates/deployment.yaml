@@ -60,6 +60,39 @@ spec:
             - name: ORDER_SERVICE_BASE_URL
               value: {{ .Values.orderServiceBaseUrl | quote }}
             {{- end }}
+            # -------------------------------------------------------------
+            # 운영 필수 JWT 및 CORS 공통 설정 (values.yaml의 appConfig 참조)
+            # -------------------------------------------------------------
+            {{- if .Values.appConfig }}
+            - name: JWT_ISSUER
+              value: {{ .Values.appConfig.jwtIssuer | quote }}
+            - name: JWT_AUDIENCE
+              value: {{ .Values.appConfig.jwtAudience | quote }}
+            - name: JWT_JWKS_URI
+              value: {{ .Values.appConfig.jwtJwksUri | quote }}
+            - name: CORS_ALLOWED_ORIGINS
+              value: {{ .Values.appConfig.corsAllowedOrigins | quote }}
+            {{- end }}
+            # -------------------------------------------------------------
+            # Auth 서비스 전용 OAuth 및 KMS 설정 (values/auth.yaml 참조)
+            # -------------------------------------------------------------
+            {{- if .Values.authConfig }}
+            - name: JWT_KMS_KEY_ID
+              value: {{ .Values.authConfig.jwtKmsKeyId | quote }}
+            - name: OAUTH_REDIRECT_URI_KAKAO
+              value: {{ .Values.authConfig.redirectUriKakao | quote }}
+            - name: OAUTH_REDIRECT_URI_NAVER
+              value: {{ .Values.authConfig.redirectUriNaver | quote }}
+            - name: OAUTH_ALLOWED_REDIRECT_URIS
+              value: {{ .Values.authConfig.allowedRedirectUris | quote }}
+            - name: OAUTH_FRONTEND_REDIRECT_URI
+              value: {{ .Values.authConfig.frontendRedirectUri | quote }}
+            - name: KAKAO_CLIENT_ID
+              value: {{ .Values.authConfig.kakaoClientId | quote }}
+            - name: NAVER_CLIENT_ID
+              value: {{ .Values.authConfig.naverClientId | quote }}
+            {{- end }}
+            # -------------------------------------------------------------
             - name: DB_HOST
               value: "{{ .Values.database.host }}"        # DB 주소
             - name: DB_PORT

@@ -79,3 +79,12 @@ serviceAccount:
   create: false
   name: ""
   annotations: {}
+
+# ==============================================================================
+# 전 서비스 공통 운영 환경 설정값 (ConfigMap 대체 주입)
+# ==============================================================================
+appConfig:
+  jwtIssuer: "https://api.cloudyim.store"
+  jwtAudience: "cloudyim-client"
+  jwtJwksUri: "https://api.cloudyim.store/.well-known/jwks.json"
+  corsAllowedOrigins: "https://cloudyim.store"
