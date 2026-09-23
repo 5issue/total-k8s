@@ -1,4 +1,6 @@
-# 카나리 방식
+# 카나리 배포 데모
+# 배포 전략 검증이 목적이라 기동이 빠른 경량 이미지(nginx)를 사용한다.
+# 시연: kubectl argo rollouts set image auth-canary-demo demo=public.ecr.aws/nginx/nginx:1.27 -n backend
 
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout                          # Deployment 대신 Rollout
@@ -6,27 +8,36 @@ metadata:
   name: auth-canary-demo
   namespace: backend
 spec:
-  replicas: 4                          # 카나리 비율 보려면 여러 개
+  replicas: 4                          # 4개 → 25%씩 비율이 파드 1개 단위로 보임
   strategy:
-    canary:                            # 카나리 방식
+    canary:
       steps:
-        - setWeight: 25                # 25%(1/4)만 새 버전
-        - pause: {duration: 30s}       # 30초 대기하며 관찰
-        - setWeight: 50                # 50%로 확대
+        - setWeight: 25                # 새 버전 25% (파드 1개)
+        - pause: {duration: 30s}       # 30초 관찰
+        - setWeight: 50                # 50% (파드 2개)
         - pause: {duration: 30s}
-        - setWeight: 75                # 75%로
+        - setWeight: 75                # 75% (파드 3개)
         - pause: {duration: 30s}
         # 마지막은 자동으로 100%
   selector:
     matchLabels:
-      app: auth-canary-demo
+      app: auth-canary-demo            # 운영 auth-service와 겹치지 않는 라벨
   template:
     metadata:
       labels:
         app: auth-canary-demo
     spec:
       containers:
-        - name: auth
-          image: "596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-auth:latest"
+        - name: demo
+          image: public.ecr.aws/nginx/nginx:1.26   # v1 (시작 버전)
           ports:
-            - containerPort: 8080
+            - containerPort: 80
+          readinessProbe:              # 응답이 와야 준비 완료로 인정
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 3
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits:   { memory: 64Mi }
