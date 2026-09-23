@@ -39,6 +39,7 @@ data:
             },
             "topic_permission": {
                 "exchange": "wms.topic.exchange",
+                "configure": r"^$",
                 "write": r"^wms\.return\.inspected$",
                 "read": r"^$",
             },
