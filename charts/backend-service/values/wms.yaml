@@ -5,6 +5,9 @@ image:
 
 rabbitmq:
   credentialsSecretName: rabbitmq-wms-credentials
+  # local profile은 유지하면서 클러스터 RabbitMQ 연결 속성만 직접 재정의한다.
+  springConnectionOverrides:
+    enabled: true
 
 
 database:

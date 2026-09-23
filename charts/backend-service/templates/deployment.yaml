@@ -88,6 +88,19 @@ spec:
                   key: {{ .Values.rabbitmq.passwordKey }}
             - name: RABBITMQ_VHOST
               value: {{ .Values.rabbitmq.vhost | quote }}
+            {{- with .Values.rabbitmq.springConnectionOverrides }}
+            {{- if .enabled }}
+            # WMS local profile에 없는 vhost 및 PEM SSL bundle 설정을 직접 재정의한다.
+            - name: SPRING_RABBITMQ_VIRTUALHOST
+              value: {{ $.Values.rabbitmq.vhost | quote }}
+            - name: SPRING_SSL_BUNDLE_PEM_RABBITMQ_TRUSTSTORE_CERTIFICATE
+              value: {{ $.Values.rabbitmq.sslCertPath | quote }}
+            - name: SPRING_RABBITMQ_SSL_BUNDLE
+              value: "rabbitmq"
+            - name: SPRING_RABBITMQ_SSL_VERIFYHOSTNAME
+              value: "true"
+            {{- end }}
+            {{- end }}
           
           
            # 생존 검사 — 실패하면 컨테이너 재시작
