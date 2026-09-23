@@ -103,6 +103,17 @@ spec:
             {{- end }}
           
           
+            {{- with .Values.database.springDatasourceOverride }}
+            {{- if .enabled }}
+            # local profile의 datasource가 고정값(localhost)인 서비스용: 환경변수로 직접 재정의한다.
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:{{ $.Values.database.type }}://$(DB_HOST):$(DB_PORT)/$(DB_NAME)"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "$(DB_USERNAME)"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "$(DB_PASSWORD)"
+            {{- end }}
+            {{- end }}
            # 생존 검사 — 실패하면 컨테이너 재시작
           livenessProbe:
             tcpSocket:

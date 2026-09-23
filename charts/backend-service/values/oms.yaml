@@ -14,6 +14,8 @@ database:
   secretName: shared-pg-oms-service-credentials
   username: oms_user
   passwordKey: password
+  springDatasourceOverride:   # DB 덮어쓰기 스위치
+    enabled: true             # oms만 켬
 
 serviceAccount:
   create: true
