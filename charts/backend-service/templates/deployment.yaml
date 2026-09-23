@@ -52,6 +52,14 @@ spec:
             # DB 접속 정보 (values의 database 블록에서 가져옴)
             - name: SPRING_PROFILES_ACTIVE
               value: "{{ .Values.springProfile | default "local" }}"
+            {{- if .Values.userServiceBaseUrl }}
+            - name: USER_SERVICE_BASE_URL
+              value: {{ .Values.userServiceBaseUrl | quote }}
+            {{- end }}
+            {{- if .Values.orderServiceBaseUrl }}
+            - name: ORDER_SERVICE_BASE_URL
+              value: {{ .Values.orderServiceBaseUrl | quote }}
+            {{- end }}
             - name: DB_HOST
               value: "{{ .Values.database.host }}"        # DB 주소
             - name: DB_PORT
