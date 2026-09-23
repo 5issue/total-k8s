@@ -1,0 +1,185 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pg-dba-admin-rotator
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::596601390909:role/pg-dba-admin-rotator"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pg-dba-admin-rotator
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["shared-pg-dba-admin-credentials"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pg-dba-admin-rotator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pg-dba-admin-rotator
+subjects:
+  - kind: ServiceAccount
+    name: pg-dba-admin-rotator
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pg-dba-admin-rotate-script
+data:
+  rotate.py: |
+    import base64
+    import datetime
+    import json
+    import secrets
+    import ssl
+    import string
+    import sys
+    import os
+    import urllib.request
+
+    import boto3
+
+    NAMESPACE = "backend"
+    SECRET_NAME = "shared-pg-dba-admin-credentials"
+    AWS_SECRET_ID = "prod/total/dba-admin-postgresql"
+    ROTATE_AFTER_DAYS = 90
+    SA_DIR = "/var/run/secrets/kubernetes.io/serviceaccount"
+
+
+    def k8s_request(method, path, body=None):
+        with open(f"{SA_DIR}/token", "r", encoding="utf-8") as f:
+            token = f.read().strip()
+        ctx = ssl.create_default_context(cafile=f"{SA_DIR}/ca.crt")
+        data = json.dumps(body).encode("utf-8") if body is not None else None
+        headers = {"Authorization": f"Bearer {token}"}
+        if body is not None:
+            headers["Content-Type"] = "application/merge-patch+json"
+        req = urllib.request.Request(
+            f"https://kubernetes.default.svc{path}", data=data, headers=headers, method=method
+        )
+        with urllib.request.urlopen(req, context=ctx, timeout=10) as resp:
+            return json.loads(resp.read())
+
+
+    def generate_password(length=12):
+        specials = "!$%&*()-_=+<>"
+        alphabet = string.ascii_letters + string.digits + specials
+        while True:
+            pw = "".join(secrets.choice(alphabet) for _ in range(length))
+            if (any(c.islower() for c in pw) and any(c.isupper() for c in pw)
+                    and any(c.isdigit() for c in pw) and any(c in specials for c in pw)):
+                return pw
+
+
+    def main():
+        secret_path = f"/api/v1/namespaces/{NAMESPACE}/secrets/{SECRET_NAME}"
+        secret = k8s_request("GET", secret_path)
+        now = datetime.datetime.now(datetime.timezone.utc)
+        last_rotated_raw = secret.get("metadata", {}).get("annotations", {}).get("dba-admin/last-rotated")
+
+        if last_rotated_raw is None:
+            print("dba-admin/last-rotated annotation missing - initializing baseline, skip rotation")
+            k8s_request("PATCH", secret_path, {
+                "metadata": {"annotations": {"dba-admin/last-rotated": now.isoformat()}},
+            })
+            return
+
+        last_rotated = datetime.datetime.fromisoformat(last_rotated_raw.replace("Z", "+00:00"))
+        elapsed_days = (now - last_rotated).days
+
+        if elapsed_days < ROTATE_AFTER_DAYS:
+            print(f"last rotated {elapsed_days}d ago (< {ROTATE_AFTER_DAYS}d) - skip")
+            return
+
+        new_password = generate_password()
+        now_iso = now.isoformat()
+
+        # Secrets Manager를 먼저 갱신한다 (실패해도 annotation이 그대로라 내일 재시도됨,
+        # 이전 값은 AWSPREVIOUS로 남아 복구 가능). K8s Secret(+annotation) 갱신은
+        # CNPG가 실제로 ALTER ROLE을 적용하는 트리거이자 "이번 순환이 끝났다"는
+        # 기준이므로 반드시 마지막에 갱신한다. 순서를 반대로 하면 K8s만 바뀌고
+        # SM 갱신이 실패했을 때 annotation은 이미 전진해서 다음 90일 동안 SM이
+        # stale 상태로 방치된다.
+        sm = boto3.client("secretsmanager", region_name=os.environ.get("AWS_REGION", "ap-northeast-2"))
+        sm.put_secret_value(
+            SecretId=AWS_SECRET_ID,
+            SecretString=json.dumps({"username": "dba_admin", "password": new_password}),
+        )
+
+        k8s_request("PATCH", secret_path, {
+            "metadata": {"annotations": {"dba-admin/last-rotated": now_iso}},
+            "data": {"password": base64.b64encode(new_password.encode()).decode()},
+        })
+        print(f"rotated dba_admin (postgresql) password at {now_iso}")
+
+
+    if __name__ == "__main__":
+        sys.exit(main() or 0)
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pg-dba-admin-rotate
+spec:
+  schedule: "10 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 180
+      template:
+        metadata:
+          labels:
+            app: pg-dba-admin-rotator
+        spec:
+          serviceAccountName: pg-dba-admin-rotator
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: rotate
+              image: python:3.13.7-alpine3.22
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  pip install --no-cache-dir --quiet --user boto3
+                  python3 /opt/rotate/rotate.py
+              env:
+                - name: HOME
+                  value: /tmp
+              volumeMounts:
+                - name: script
+                  mountPath: /opt/rotate
+                  readOnly: true
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                runAsNonRoot: true
+                seccompProfile:
+                  type: RuntimeDefault
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: 250m
+                  memory: 256Mi
+          volumes:
+            - name: script
+              configMap:
+                name: pg-dba-admin-rotate-script

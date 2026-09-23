@@ -39,6 +39,16 @@ spec:
               CREATE DATABASE IF NOT EXISTS user_db;
               GRANT ALL PRIVILEGES ON user_db.* TO 'user_user'@'%';
 
+              -- DBA 관리자 계정 (jaehyeok, jongwon 전용). moco-admin과 달리
+              -- SUPER/REPLICATION/PROCESS/FILE/SHUTDOWN/GRANT OPTION은 제외한
+              -- DDL+DML 권한만 부여한다. 이미 존재하면 비밀번호를 덮어쓰지 않음
+              -- (90일 순환은 dba-admin-rotate CronJob이 ALTER USER로 별도 처리).
+              CREATE USER IF NOT EXISTS 'dba_admin'@'%' IDENTIFIED BY '${DBA_ADMIN_PASSWORD}';
+              GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, INDEX,
+                CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, EXECUTE,
+                REFERENCES, TRIGGER, LOCK TABLES, CREATE TEMPORARY TABLES
+                ON *.* TO 'dba_admin'@'%';
+
               FLUSH PRIVILEGES;
               SQL
 
@@ -65,6 +75,11 @@ spec:
                 secretKeyRef:
                   name: shared-mysql-accounts
                   key: member_service_password
+            - name: DBA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shared-mysql-dba-admin
+                  key: password
             - name: MOCO_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
