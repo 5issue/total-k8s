@@ -44,9 +44,11 @@ serviceAccount:
   name: ai-sa
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/ai-service-irsa
-# # LLM 연동 설정 (OpenRouter)
-# llm:
-#   provider: openrouter
-#   baseUrl: https://openrouter.ai/api/v1
-#   model: "TODO-ai팀-모델명"        # TODO: AI팀 환경변수 답변 대기
-#   apiKeySecret: ai-llm-secret
+
+# LLM 연동 설정 (AI팀 가이드 기준)
+environment: prod
+llm:
+  provider: openai
+  model: gpt-4.1-mini
+  baseUrl: ""
+  apiKeySecret: ai-llm-secret
