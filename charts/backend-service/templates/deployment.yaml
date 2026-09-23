@@ -91,6 +91,16 @@ spec:
               value: {{ .Values.authConfig.kakaoClientId | quote }}
             - name: NAVER_CLIENT_ID
               value: {{ .Values.authConfig.naverClientId | quote }}
+            - name: KAKAO_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secret
+                  key: KAKAO_CLIENT_SECRET
+            - name: NAVER_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secret
+                  key: NAVER_CLIENT_SECRET
             {{- end }}
             # -------------------------------------------------------------
             - name: DB_HOST
