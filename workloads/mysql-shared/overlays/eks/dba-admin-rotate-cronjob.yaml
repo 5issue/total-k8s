@@ -1,0 +1,223 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mysql-dba-admin-rotator
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::596601390909:role/mysql-dba-admin-rotator"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mysql-dba-admin-rotator
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["shared-mysql-dba-admin"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mysql-dba-admin-rotator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mysql-dba-admin-rotator
+subjects:
+  - kind: ServiceAccount
+    name: mysql-dba-admin-rotator
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-dba-admin-rotate-script
+data:
+  rotate.py: |
+    # 이 스크립트만 pip 설치(boto3, pymysql)가 필요합니다. K8s Secret patch는
+    # 다른 provisioning 스크립트들처럼 stdlib(urllib)로 in-cluster API를 직접 호출합니다.
+    import base64
+    import datetime
+    import json
+    import os
+    import secrets
+    import ssl
+    import string
+    import sys
+    import time
+    import urllib.request
+
+    import boto3
+    import pymysql
+
+    NAMESPACE = "backend"
+    SECRET_NAME = "shared-mysql-dba-admin"
+    AWS_SECRET_ID = "prod/total/dba-admin-mysql"
+    ROTATE_AFTER_DAYS = 90
+    MYSQL_HOST = "moco-shared-mysql-primary.backend.svc.cluster.local"
+    MYSQL_PORT = 3306
+    SA_DIR = "/var/run/secrets/kubernetes.io/serviceaccount"
+
+
+    def k8s_request(method, path, body=None):
+        with open(f"{SA_DIR}/token", "r", encoding="utf-8") as f:
+            token = f.read().strip()
+        ctx = ssl.create_default_context(cafile=f"{SA_DIR}/ca.crt")
+        data = json.dumps(body).encode("utf-8") if body is not None else None
+        headers = {"Authorization": f"Bearer {token}"}
+        if body is not None:
+            headers["Content-Type"] = "application/merge-patch+json"
+        req = urllib.request.Request(
+            f"https://kubernetes.default.svc{path}", data=data, headers=headers, method=method
+        )
+        with urllib.request.urlopen(req, context=ctx, timeout=10) as resp:
+            return json.loads(resp.read())
+
+
+    def generate_password(length=12):
+        specials = "!$%&*()-_=+<>"
+        alphabet = string.ascii_letters + string.digits + specials
+        while True:
+            pw = "".join(secrets.choice(alphabet) for _ in range(length))
+            if (any(c.islower() for c in pw) and any(c.isupper() for c in pw)
+                    and any(c.isdigit() for c in pw) and any(c in specials for c in pw)):
+                return pw
+
+
+    def main():
+        secret_path = f"/api/v1/namespaces/{NAMESPACE}/secrets/{SECRET_NAME}"
+        secret = k8s_request("GET", secret_path)
+        now = datetime.datetime.now(datetime.timezone.utc)
+        last_rotated_raw = secret.get("metadata", {}).get("annotations", {}).get("dba-admin/last-rotated")
+
+        if last_rotated_raw is None:
+            # annotation이 없는 비정상 상태(수동 생성 등). 바로 순환하는 대신
+            # 기준일만 오늘로 맞추고 종료 - 다음 실행부터 정상적으로 카운트된다.
+            print("dba-admin/last-rotated annotation missing - initializing baseline, skip rotation")
+            k8s_request("PATCH", secret_path, {
+                "metadata": {"annotations": {"dba-admin/last-rotated": now.isoformat()}},
+            })
+            return
+
+        last_rotated = datetime.datetime.fromisoformat(last_rotated_raw.replace("Z", "+00:00"))
+        elapsed_days = (now - last_rotated).days
+
+        if elapsed_days < ROTATE_AFTER_DAYS:
+            print(f"last rotated {elapsed_days}d ago (< {ROTATE_AFTER_DAYS}d) - skip")
+            return
+
+        new_password = generate_password()
+
+        conn = pymysql.connect(
+            host=MYSQL_HOST, port=MYSQL_PORT,
+            user="moco-admin", password=os.environ["MOCO_ADMIN_PASSWORD"],
+            connect_timeout=10,
+        )
+        try:
+            with conn.cursor() as cur:
+                cur.execute("ALTER USER 'dba_admin'@'%%' IDENTIFIED BY %s", (new_password,))
+                cur.execute("FLUSH PRIVILEGES")
+            conn.commit()
+        finally:
+            conn.close()
+
+        # 이 시점부터 실제 DB 비밀번호는 이미 new_password로 바뀐 상태다.
+        # Secrets Manager/K8s Secret 반영이 실패하면 아무 곳에도 실제 값이
+        # 기록되지 않은 채로 남으므로, 성공할 때까지 재시도한다(그냥 다음날
+        # 실행에 맡기면 최대 하루 동안 아무도 실제 비밀번호를 모르게 된다).
+        now_iso = now.isoformat()
+        secret_string = json.dumps({"username": "dba_admin", "password": new_password})
+        sm = boto3.client("secretsmanager", region_name=os.environ.get("AWS_REGION", "ap-northeast-2"))
+
+        last_error = None
+        for attempt in range(5):
+            try:
+                sm.put_secret_value(SecretId=AWS_SECRET_ID, SecretString=secret_string)
+                k8s_request("PATCH", secret_path, {
+                    "metadata": {"annotations": {"dba-admin/last-rotated": now_iso}},
+                    "data": {"password": base64.b64encode(new_password.encode()).decode()},
+                })
+                print(f"rotated dba_admin (mysql) password at {now_iso}")
+                return
+            except Exception as exc:  # noqa: BLE001 - 반드시 재시도해야 하는 구간
+                last_error = exc
+                print(f"persist attempt {attempt + 1}/5 failed: {exc}", file=sys.stderr)
+                time.sleep(5)
+
+        # 5회 재시도 후에도 실패 - DB 비밀번호는 이미 바뀌었으니 실패로 종료해서
+        # CronJob 실패 알림/모니터링으로 드러나게 한다 (annotation 미갱신이라
+        # 내일 다시 시도되지만, 그 사이엔 사람이 확인해야 하는 상태).
+        raise RuntimeError(
+            "DB password changed but failed to persist to Secrets Manager/K8s Secret "
+            f"after 5 attempts: {last_error}"
+        )
+
+
+    if __name__ == "__main__":
+        sys.exit(main() or 0)
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mysql-dba-admin-rotate
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            app: mysql-dba-admin-rotator
+        spec:
+          serviceAccountName: mysql-dba-admin-rotator
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: rotate
+              image: python:3.13.7-alpine3.22
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  pip install --no-cache-dir --quiet --user boto3 pymysql
+                  python3 /opt/rotate/rotate.py
+              env:
+                - name: HOME
+                  value: /tmp
+                - name: MOCO_ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: moco-shared-mysql
+                      key: ADMIN_PASSWORD
+              volumeMounts:
+                - name: script
+                  mountPath: /opt/rotate
+                  readOnly: true
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                runAsNonRoot: true
+                seccompProfile:
+                  type: RuntimeDefault
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: 250m
+                  memory: 256Mi
+          volumes:
+            - name: script
+              configMap:
+                name: mysql-dba-admin-rotate-script

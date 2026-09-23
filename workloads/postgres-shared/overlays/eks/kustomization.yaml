@@ -10,6 +10,7 @@ resources:
   - rbac-secret-access.yaml
   - service-databases.yaml
   - scheduled-backup.yaml
+  - dba-admin-rotate-cronjob.yaml
 
 patches:
   - path: cluster-patch.yaml

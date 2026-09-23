@@ -1,6 +1,6 @@
 - op: add
   path: /spec/enableSuperuserAccess
-  value: true
+  value: false
 - op: add
   path: /spec/postgresql
   value:
@@ -100,3 +100,18 @@
         login: true
         passwordSecret:
           name: shared-pg-ai-service-credentials
+      # DBA 관리자 계정 (jaehyeok, jongwon 전용, RBAC: db-admin-readers 그룹만 secret 조회 가능)
+      # superuser는 아니며(enableSuperuserAccess: false), createdb/createrole + 전체 데이터
+      # 읽기/쓰기(pg_read_all_data, pg_write_all_data)를 가진 DDL 포함 관리자 계정.
+      # 주의: product_user 등이 소유한 기존 테이블의 ALTER/DROP은 소유권 기반이라
+      # 필요 시 `SET ROLE product_user;` 후 작업해야 함 (superuser가 아니므로).
+      - name: dba_admin
+        ensure: present
+        login: true
+        createdb: true
+        createrole: true
+        inRoles:
+          - pg_read_all_data
+          - pg_write_all_data
+        passwordSecret:
+          name: shared-pg-dba-admin-credentials

@@ -13,6 +13,7 @@ resources:
   - serviceAccount.yaml
   - scheduled-backup.yaml
   - account-provisioning-job.yaml
+  - dba-admin-rotate-cronjob.yaml
 
 patches:
   - path: mysqlcluster-patch.yaml
