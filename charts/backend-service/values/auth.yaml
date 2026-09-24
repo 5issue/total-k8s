@@ -1,5 +1,6 @@
 # auth-service 전용 값 (공통은 values.yaml에서 물려받음)
 serviceName: auth-service        # 이 서비스 이름
+replicaCount: 2
 image:
   repository: kurly-auth              # ECR 창고 이름
 
@@ -22,7 +23,7 @@ userServiceBaseUrl: "http://user-service.backend.svc.cluster.local:8080"
 
 # Auth Service 전용 필수 설정값
 authConfig:
-  jwtKmsKeyId: "alias/auth-jwt-sign-key"
+  jwtKmsKeyId: "alias/auth-jwt-signing"
   redirectUriKakao: "https://api.cloudyim.store/api/v1/auth/oauth/kakao/callback"
   redirectUriNaver: "https://api.cloudyim.store/api/v1/auth/oauth/naver/callback"
   allowedRedirectUris: "https://cloudyim.store,https://api.cloudyim.store/api/v1/auth/oauth/kakao/callback,https://api.cloudyim.store/api/v1/auth/oauth/naver/callback"

@@ -36,7 +36,7 @@ rabbitmq:
   caMountPath: /etc/ssl/certs/rabbitmq
   sslCertPath: /etc/ssl/certs/rabbitmq/ca.crt
 
-  # 헬스체크 (건강검진) 설정
+# 헬스체크 (건강검진) 설정
 health:
   path: /actuator/health   # Spring Boot 기본 건강검진 주소
   livenessDelay: 120        # 컨테이너 뜨고 120초 뒤부터 생존검사 시작 (앱 뜰 시간 줌)

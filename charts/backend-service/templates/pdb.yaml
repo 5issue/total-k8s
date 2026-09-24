@@ -1,5 +1,6 @@
 # 최소 몇개 pod 유지 규칙
 # templates/pdb.yaml
+{{- if and .Values.pdb (gt (int .Values.replicaCount) 1) }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -10,3 +11,4 @@ spec:
   selector:
     matchLabels:
       app: {{ .Values.serviceName }}       # 이 라벨 붙은 파드를 대상으로
+{{- end }}

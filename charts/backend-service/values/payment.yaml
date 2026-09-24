@@ -20,3 +20,5 @@ serviceAccount:
     eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/payment-service-irsa
 
 orderServiceBaseUrl: "http://order-service.backend.svc.cluster.local:8080"
+paymentPgClient: "toss"
+paymentOrderClient: "http"
