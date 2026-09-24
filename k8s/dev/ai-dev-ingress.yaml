@@ -7,6 +7,8 @@ metadata:
     alb.ingress.kubernetes.io/scheme: "internet-facing"
     alb.ingress.kubernetes.io/target-type: "ip"
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-northeast-2:596601390909:certificate/30f62fc0-4cb0-4201-990f-6ad487fa7240"
     alb.ingress.kubernetes.io/group.name: "main-alb-group"
     alb.ingress.kubernetes.io/group.order: "4"
     alb.ingress.kubernetes.io/healthcheck-protocol: "HTTP"
