@@ -47,7 +47,6 @@ data:
             },
             "topic_permission": {
                 "exchange": "wms.topic.exchange",
-                "configure": r"^$",
                 "write": (
                     r"^wms\.(inbound\.completed|outbound\.completed|"
                     r"return\.inspected)$"
@@ -79,7 +78,6 @@ data:
             },
             "topic_permission": {
                 "exchange": "wms.topic.exchange",
-                "configure": r"^$",
                 "write": r"^$",
                 "read": r"^wms\.return\.inspected$",
             },
