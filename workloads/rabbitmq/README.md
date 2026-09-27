@@ -32,7 +32,7 @@ Production과 Dev Backend는 `messaging` Namespace의 동일한 RabbitMQ cluster
 | Protocol              | AMQPS                                  |
 | CA Secret             | `rabbitmq-ca`                          |
 | CA Key                | `ca.crt`                               |
-| CA Mount              | `/etc/rabbitmq/tls/ca.crt`             |
+| CA Mount              | `/etc/ssl/certs/rabbitmq/ca.crt`       |
 | Hostname verification | enabled                                |
 
 Application Messaging Topology와 서비스별 Application Identity는 Backend 최종 계약을 기준으로 관리합니다.

@@ -33,14 +33,25 @@ data:
             "username": "total-wms",
             "secret_path": "/var/run/rabbitmq-secrets/wms",
             "permissions": {
-                "configure": r"^wms\.topic\.exchange$",
-                "write": r"^wms\.topic\.exchange$",
-                "read": r"^$",
+                "configure": (
+                    r"^(order\.topic\.exchange|session\.topic\.exchange|"
+                    r"wms\.topic\.exchange|wms\.inventory\.confirm\.(queue|dlq))$"
+                ),
+                "write": (
+                    r"^(amq\.default|session\.topic\.exchange|wms\.topic\.exchange|"
+                    r"wms\.inventory\.confirm\.queue)$"
+                ),
+                "read": (
+                    r"^(order\.topic\.exchange|wms\.inventory\.confirm\.queue)$"
+                ),
             },
             "topic_permission": {
                 "exchange": "wms.topic.exchange",
                 "configure": r"^$",
-                "write": r"^wms\.return\.inspected$",
+                "write": (
+                    r"^wms\.(inbound\.completed|outbound\.completed|"
+                    r"return\.inspected)$"
+                ),
                 "read": r"^$",
             },
         },
@@ -50,20 +61,27 @@ data:
             "secret_path": "/var/run/rabbitmq-secrets/oms",
             "permissions": {
                 "configure": (
-                    r"^(oms\.topic\.exchange|oms\."
+                    r"^(session\.topic\.exchange|oms\.topic\.exchange|oms\."
                     r"(order-payment-completed|return-requested|wms-inspected|payment-refunded)"
                     r"\.(queue|dlq))$"
                 ),
                 "write": (
-                    r"^(amq\.default|oms\.topic\.exchange|oms\."
+                    r"^(amq\.default|session\.topic\.exchange|oms\.topic\.exchange|oms\."
                     r"(order-payment-completed|return-requested|wms-inspected|payment-refunded)"
                     r"\.queue)$"
                 ),
                 "read": (
-                    r"^(order\.topic\.exchange|oms\.topic\.exchange|oms\."
+                    r"^(order\.topic\.exchange|payment\.topic\.exchange|"
+                    r"oms\.topic\.exchange|wms\.topic\.exchange|oms\."
                     r"(order-payment-completed|return-requested|wms-inspected|payment-refunded)"
                     r"\.queue)$"
                 ),
+            },
+            "topic_permission": {
+                "exchange": "wms.topic.exchange",
+                "configure": r"^$",
+                "write": r"^$",
+                "read": r"^wms\.return\.inspected$",
             },
         },
     )
@@ -80,7 +98,15 @@ data:
         return value
 
 
-    def api_request(method, resource, basic_token, tls_context, payload=None, timeout=10):
+    def api_request(
+        method,
+        resource,
+        basic_token,
+        tls_context,
+        payload=None,
+        timeout=10,
+        allowed_statuses=(),
+    ):
         body = None
         headers = {
             "Accept": "application/json",
@@ -101,6 +127,8 @@ data:
                     return None
                 return json.loads(response_body)
         except urllib.error.HTTPError as error:
+            if error.code in allowed_statuses:
+                return None
             raise RuntimeError(
                 f"{method} {resource} failed with HTTP status {error.code}"
             ) from None
@@ -122,6 +150,16 @@ data:
                 f"{contract['name']} identity username does not match the infrastructure contract"
             )
         return {**contract, "password": password}
+
+
+    def topic_permissions_match(actual, expected):
+        if not isinstance(actual, list):
+            return False
+        if expected is None:
+            return not actual
+        return len(actual) == 1 and all(
+            actual[0].get(key) == value for key, value in expected.items()
+        )
 
 
     def reconcile_identity(identity, encoded_vhost, basic_token, tls_context):
@@ -159,13 +197,35 @@ data:
                         "arguments": {},
                     },
                 )
+            topic_permission_resource = (
+                f"/api/topic-permissions/{encoded_vhost}/{encoded_username}"
+            )
+            current_topic_permissions = api_request(
+                "GET",
+                topic_permission_resource,
+                basic_token,
+                tls_context,
+            )
+            if not isinstance(current_topic_permissions, list):
+                raise RuntimeError("topic permission lookup failed")
+            if not topic_permissions_match(
+                current_topic_permissions, expected_topic_permission
+            ):
                 api_request(
-                    "PUT",
-                    f"/api/topic-permissions/{encoded_vhost}/{encoded_username}",
+                    "DELETE",
+                    topic_permission_resource,
                     basic_token,
                     tls_context,
-                    expected_topic_permission,
+                    allowed_statuses=(404,),
                 )
+                if expected_topic_permission is not None:
+                    api_request(
+                        "PUT",
+                        topic_permission_resource,
+                        basic_token,
+                        tls_context,
+                        expected_topic_permission,
+                    )
 
             user = api_request(
                 "GET", f"/api/users/{encoded_username}", basic_token, tls_context
@@ -176,15 +236,12 @@ data:
                 basic_token,
                 tls_context,
             )
-            if expected_topic_permission is not None:
-                topic_permissions = api_request(
-                    "GET",
-                    f"/api/topic-permissions/{encoded_vhost}/{encoded_username}",
-                    basic_token,
-                    tls_context,
-                )
-            else:
-                topic_permissions = None
+            topic_permissions = api_request(
+                "GET",
+                f"/api/topic-permissions/{encoded_vhost}/{encoded_username}",
+                basic_token,
+                tls_context,
+            )
 
             if not isinstance(user, dict) or user.get("name") != identity["username"]:
                 raise RuntimeError("user verification failed")
@@ -195,21 +252,8 @@ data:
                 for key, value in identity["permissions"].items()
             ):
                 raise RuntimeError("permission verification failed")
-            if expected_topic_permission is not None:
-                if not isinstance(topic_permissions, list):
-                    raise RuntimeError("topic permission verification failed")
-                matching_topic_permissions = [
-                    permission
-                    for permission in topic_permissions
-                    if permission.get("exchange")
-                    == expected_topic_permission["exchange"]
-                ]
-                if len(matching_topic_permissions) != 1 or any(
-                    matching_topic_permissions[0].get(key) != value
-                    for key, value in expected_topic_permission.items()
-                    if key != "configure"
-                ):
-                    raise RuntimeError("topic permission verification failed")
+            if not topic_permissions_match(topic_permissions, expected_topic_permission):
+                raise RuntimeError("topic permission verification failed")
         except RuntimeError as error:
             raise RuntimeError(
                 f"{identity['name']} identity reconciliation failed: {error}"
