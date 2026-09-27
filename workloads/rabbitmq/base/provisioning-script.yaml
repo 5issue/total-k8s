@@ -106,6 +106,7 @@ data:
         payload=None,
         timeout=10,
         allowed_statuses=(),
+        allowed_status_result=None,
     ):
         body = None
         headers = {
@@ -128,7 +129,7 @@ data:
                 return json.loads(response_body)
         except urllib.error.HTTPError as error:
             if error.code in allowed_statuses:
-                return None
+                return allowed_status_result
             raise RuntimeError(
                 f"{method} {resource} failed with HTTP status {error.code}"
             ) from None
@@ -160,6 +161,20 @@ data:
         return len(actual) == 1 and all(
             actual[0].get(key) == value for key, value in expected.items()
         )
+
+
+    def get_topic_permissions(resource, basic_token, tls_context):
+        topic_permissions = api_request(
+            "GET",
+            resource,
+            basic_token,
+            tls_context,
+            allowed_statuses=(404,),
+            allowed_status_result=[],
+        )
+        if not isinstance(topic_permissions, list):
+            raise RuntimeError("topic permission lookup failed")
+        return topic_permissions
 
 
     def reconcile_identity(identity, encoded_vhost, basic_token, tls_context):
@@ -200,14 +215,11 @@ data:
             topic_permission_resource = (
                 f"/api/topic-permissions/{encoded_vhost}/{encoded_username}"
             )
-            current_topic_permissions = api_request(
-                "GET",
+            current_topic_permissions = get_topic_permissions(
                 topic_permission_resource,
                 basic_token,
                 tls_context,
             )
-            if not isinstance(current_topic_permissions, list):
-                raise RuntimeError("topic permission lookup failed")
             if not topic_permissions_match(
                 current_topic_permissions, expected_topic_permission
             ):
@@ -236,8 +248,7 @@ data:
                 basic_token,
                 tls_context,
             )
-            topic_permissions = api_request(
-                "GET",
+            topic_permissions = get_topic_permissions(
                 f"/api/topic-permissions/{encoded_vhost}/{encoded_username}",
                 basic_token,
                 tls_context,
