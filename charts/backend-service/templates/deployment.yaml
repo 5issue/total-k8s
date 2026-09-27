@@ -52,6 +52,7 @@ spec:
             # DB 접속 정보 (values의 database 블록에서 가져옴)
             - name: SPRING_PROFILES_ACTIVE
               value: "{{ .Values.springProfile | default "prod" }}"
+            # 서비스 URL
             {{- if .Values.userServiceBaseUrl }}
             - name: USER_SERVICE_BASE_URL
               value: {{ .Values.userServiceBaseUrl | quote }}
@@ -59,6 +60,22 @@ spec:
             {{- if .Values.orderServiceBaseUrl }}
             - name: ORDER_SERVICE_BASE_URL
               value: {{ .Values.orderServiceBaseUrl | quote }}
+            {{- end }}
+            {{- if .Values.omsServiceBaseUrl }}
+            - name: OMS_SERVICE_BASE_URL
+              value: {{ .Values.omsServiceBaseUrl | quote }}
+            {{- end }}
+            {{- if .Values.paymentServiceBaseUrl }}
+            - name: PAYMENT_SERVICE_BASE_URL
+              value: {{ .Values.paymentServiceBaseUrl | quote }}
+            {{- end }}
+            {{- if .Values.productServiceBaseUrl }}
+            - name: PRODUCT_SERVICE_BASE_URL
+              value: {{ .Values.productServiceBaseUrl | quote }}
+            {{- end }}
+            {{- if .Values.memberServiceBaseUrl }}
+            - name: MEMBER_SERVICE_BASE_URL
+              value: {{ .Values.memberServiceBaseUrl | quote }}
             {{- end }}
             # -------------------------------------------------------------
             # Payment 서비스 전용 Toss 및 클라이언트 설정
