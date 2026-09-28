@@ -29,6 +29,9 @@ spec:
         helm:
           valueFiles:
             - 'values/{{.svc}}.yaml'
+          parameters:
+            - name: replicaCount
+              value: "1"
       destination:
         server: 'https://kubernetes.default.svc'
         namespace: dev                    # 배포할 네임스페이스를 dev로 지정
