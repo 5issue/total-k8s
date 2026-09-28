@@ -77,11 +77,10 @@ networkPolicy:
 # dev 환경에서는 기본적으로 비활성화하고 운영 ApplicationSet에서만 활성화합니다.
 keda:
   enabled: false
-  pollingInterval: 30
-  cooldownPeriod: 300
   minReplicaCount: 2
   maxReplicaCount: 10
   queueLength: "30"
+  scaleDownStabilizationWindowSeconds: 300
   queues: []
 
 # 기본값은 꺼둠

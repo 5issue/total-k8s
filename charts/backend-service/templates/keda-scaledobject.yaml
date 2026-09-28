@@ -8,10 +8,13 @@ metadata:
 spec:
   scaleTargetRef:
     name: {{ .Values.serviceName }}
-  pollingInterval: {{ .Values.keda.pollingInterval }}
-  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
   minReplicaCount: {{ .Values.keda.minReplicaCount }}
   maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: {{ .Values.keda.scaleDownStabilizationWindowSeconds }}
   triggers:
     {{- range .Values.keda.queues }}
     - type: rabbitmq
