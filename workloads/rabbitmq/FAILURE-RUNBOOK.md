@@ -42,7 +42,7 @@ CA trust 배포 및 복구는 [TRUST-PUBLICATION-RUNBOOK.md](TRUST-PUBLICATION-R
 2. application credential 관련 Secret의 존재와 key 구성을 확인합니다.
 3. Provisioning Job 상태와 로그를 확인합니다.
 4. TLS, NetworkPolicy, bootstrap authentication, application credential 상태를 구분합니다.
-5. 원인 조치 후 Provisioning Job을 다시 실행합니다.
-6. vhost, application user, permission이 계약 상태로 수렴했는지 확인합니다.
+5. 원인 조치 후 `rabbitmq-provisioning-app`을 다시 Sync하여 Provisioning Job을 재실행합니다.
+6. vhost, application user, Resource Permission 및 Topic Permission이 계약 상태로 수렴했는지 확인합니다.
 
-Application Identity 구성과 복구는 [CREDENTIAL-PROVISIONING-RUNBOOK.md](CREDENTIAL-PROVISIONING-RUNBOOK.md)를 따릅니다.
+Application Identity 구성 계약은 [README.md](README.md)를 따르며, credential Source 및 Kubernetes Secret publication은 `total-infra`의 Workload Secret Publication Runbook을 따릅니다.
