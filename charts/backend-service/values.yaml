@@ -44,7 +44,7 @@ health:
 
 # PDB (파드 중단 예산) 설정
 pdb:
-  maxUnavailable: 1     # 최대 1개까지만 동시에 내려라             
+  maxUnavailable: 1     # 최대 1개까지만 동시에 내려라
 
 # 모든 서비스 공통 포트 (쿠버네티스는 파드 격리라 통일 가능)
 serverPort: 8080
@@ -73,6 +73,16 @@ networkPolicy:
     - 172.31.48.0/20
     # 2. 내부 프라이빗 대역 (노드/파드 VPC 내부 통신용)
     - 10.0.0.0/16
+# KEDA RabbitMQ Queue 기반 자동 확장
+# dev 환경에서는 기본적으로 비활성화하고 운영 ApplicationSet에서만 활성화합니다.
+keda:
+  enabled: false
+  pollingInterval: 30
+  cooldownPeriod: 300
+  minReplicaCount: 2
+  maxReplicaCount: 10
+  queueLength: "30"
+  queues: []
 
 # 기본값은 꺼둠
 serviceAccount:

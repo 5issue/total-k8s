@@ -1,0 +1,27 @@
+{{- if and .Values.keda.enabled (gt (len .Values.keda.queues) 0) (ne .Values.serviceName "swagger-ui") }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ .Values.serviceName }}-rabbitmq
+  labels:
+    app: {{ .Values.serviceName }}
+spec:
+  scaleTargetRef:
+    name: {{ .Values.serviceName }}
+  pollingInterval: {{ .Values.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
+  minReplicaCount: {{ .Values.keda.minReplicaCount }}
+  maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  triggers:
+    {{- range .Values.keda.queues }}
+    - type: rabbitmq
+      metadata:
+        host: {{ printf "amqps://%s:%v/%s" $.Values.rabbitmq.host $.Values.rabbitmq.port $.Values.rabbitmq.vhost | quote }}
+        protocol: amqp
+        queueName: {{ . | quote }}
+        mode: QueueLength
+        value: {{ $.Values.keda.queueLength | quote }}
+      authenticationRef:
+        name: {{ $.Values.serviceName }}-rabbitmq
+    {{- end }}
+{{- end }}

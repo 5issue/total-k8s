@@ -1,23 +1,25 @@
 # order-service 전용 값 (공통은 values.yaml에서 물려받음)
 serviceName: order-service        # 이 서비스 이름
-replicaCount: 2 
+replicaCount: 2
 image:
   repository: kurly-order              # ECR 창고 이름
 
 database:
   type: mysql
-  host: shared-mysql-primary.backend.svc.cluster.local   # TODO[1] 
+  host: shared-mysql-primary.backend.svc.cluster.local   # TODO[1]
   port: 3306
   name: order_db                                          # TODO[2] 확인
   secretName: shared-mysql-accounts          # MySQL 공용 Secret
   username: order_user                       #  MySQL username key는 확인 필요
-  passwordKey: order_service_password       
-
+  passwordKey: order_service_password
+keda:
+  queues:
+    - order.inventory-restored.queue
 serviceAccount:
   create: true
   name: order-sa
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/order-service-irsa   
+    eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/order-service-irsa
 
 omsServiceBaseUrl: "http://oms-service.backend.svc.cluster.local:8080"
 paymentServiceBaseUrl: "http://payment-service.backend.svc.cluster.local:8080"
