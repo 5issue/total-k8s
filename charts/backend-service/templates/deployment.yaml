@@ -30,6 +30,10 @@ spec:
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ .Values.serviceAccount.name }}
       {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:                      # 이 라벨을 가진 노드에만 배치
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Values.serviceName }}
           # 이미지 주소 = 레지스트리/이미지이름:태그 (세 값 조합)
