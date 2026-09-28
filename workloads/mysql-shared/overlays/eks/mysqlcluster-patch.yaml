@@ -65,3 +65,26 @@
 - op: add
   path: /spec/backupPolicyName
   value: shared-mysql-daily
+- op: add
+  path: /spec/podTemplate/spec/containers/-
+  value:
+    name: audit-log
+    image: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-moco-mysql:8.0.41-32.1
+    command: ["tail", "-n", "+1", "-F", "/var/log/mysql/audit.log"]
+    volumeMounts:
+      - name: var-log
+        mountPath: /var/log/mysql
+        readOnly: true
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi

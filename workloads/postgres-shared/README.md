@@ -56,6 +56,9 @@ PostgreSQL 확장 모듈(`passwordcheck`, `credcheck`)을 엔진 레벨에 네�
 * **감사 도구**: `pgaudit` 네이티브 확장을 모든 대상 Database에 활성화
 * **로깅 파라미터**: `pgaudit.log: "all, -misc"`, `pgaudit.log_parameter: "on"`, `pgaudit.log_relation: "on"`
 * **조회 통제**: 감사 로그 접근 및 분석 권한은 관리자 화이트리스트(임종원, 이재혁)로 제한
+* **로드 방식**: CNPG가 `pgaudit.*` 파라미터 존재 시 `shared_preload_libraries`에 `pgaudit`를 자동 추가(명시값과 중복 제거)하고, 모든 DB에 `CREATE EXTENSION pgaudit`를 수행
+* **확인**: `kubectl -n backend exec shared-pg-1 -c postgres -- psql -Atc "SHOW shared_preload_libraries"` → `pgaudit,passwordcheck` 포함, 감사 레코드는 파드 stdout JSON(`"logger":"pgaudit"`)으로 출력
+* **설정 파일 권한(D-14)**: CNPG 파드는 설정/인증 정보를 Secret·ConfigMap 볼륨으로 마운트하지 않음 — 인스턴스 매니저가 K8s API로 읽어 PGDATA(PVC)와 `scratch-data`(emptyDir, `/controller`) 안에 `postgresql.conf`·`pg_hba.conf`·인증서를 postgres(uid 26) 소유로 직접 생성
 
 ---
 
