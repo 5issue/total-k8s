@@ -8,3 +8,13 @@ helmCharts:
     releaseName: moco
     namespace: moco-system
     includeCRDs: true
+# 시스템 컴포넌트: MOCO 컨트롤러는 On-Demand 노드에만 배치
+patches:
+  - target:
+      kind: Deployment
+      name: moco-controller
+    patch: |-
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          eks.amazonaws.com/capacityType: ON_DEMAND
