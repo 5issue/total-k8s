@@ -5805,6 +5805,8 @@ spec:
         app.kubernetes.io/name: rabbitmq-cluster-operator
         app.kubernetes.io/part-of: rabbitmq
     spec:
+      nodeSelector:                       # 시스템 컴포넌트: On-Demand 전용
+        eks.amazonaws.com/capacityType: ON_DEMAND
       containers:
       - args:
         - --health-probe-bind-address=:8081

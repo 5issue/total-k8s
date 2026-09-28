@@ -18,20 +18,17 @@
   value:
     podAntiAffinityType: required
     topologyKey: topology.kubernetes.io/zone
-    nodeAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          preference:
-            matchExpressions:
-              - key: karpenter.sh/capacity-type
-                operator: In
-                values: ["on-demand"]
-        - weight: 100
-          preference:
-            matchExpressions:
+    nodeAffinity:                        # 상태 저장 워크로드: On-Demand 필수 (Redis·RabbitMQ와 동일)
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
               - key: eks.amazonaws.com/capacityType
                 operator: In
                 values: ["ON_DEMAND"]
+          - matchExpressions:
+              - key: karpenter.sh/capacity-type
+                operator: In
+                values: ["on-demand"]
 - op: add
   path: /spec/resources
   value:
