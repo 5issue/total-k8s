@@ -17,6 +17,13 @@ database:
   springDatasourceOverride:   # DB 덮어쓰기 스위치
     enabled: true             # oms만 켬
 
+keda:
+  queues:
+    - oms.order-payment-completed.queue
+    - oms.return-requested.queue
+    - oms.wms-inspected.queue
+    - oms.payment-refunded.queue
+
 serviceAccount:
   create: true
   name: oms-sa

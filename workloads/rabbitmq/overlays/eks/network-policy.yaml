@@ -17,6 +17,9 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: dev
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: keda
       ports:
         - protocol: TCP
           port: 5671

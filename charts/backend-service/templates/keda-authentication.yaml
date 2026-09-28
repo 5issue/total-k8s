@@ -1,0 +1,32 @@
+{{- if and .Values.keda.enabled (gt (len .Values.keda.queues) 0) (ne .Values.serviceName "swagger-ui") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.serviceName }}-keda-rabbitmq
+  labels:
+    app: {{ .Values.serviceName }}
+data:
+  tls: "enable"
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: {{ .Values.serviceName }}-rabbitmq
+  labels:
+    app: {{ .Values.serviceName }}
+spec:
+  secretTargetRef:
+    - parameter: username
+      name: {{ .Values.rabbitmq.credentialsSecretName }}
+      key: {{ .Values.rabbitmq.usernameKey }}
+    - parameter: password
+      name: {{ .Values.rabbitmq.credentialsSecretName }}
+      key: {{ .Values.rabbitmq.passwordKey }}
+    - parameter: ca
+      name: {{ .Values.rabbitmq.caSecretName }}
+      key: {{ .Values.rabbitmq.caSecretKey }}
+  configMapTargetRef:
+    - parameter: tls
+      name: {{ .Values.serviceName }}-keda-rabbitmq
+      key: tls
+{{- end }}

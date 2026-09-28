@@ -18,6 +18,10 @@ database:
   username: wms_user                                # PostgreSQL은 username key 있음
   passwordKey: password
 
+keda:
+  queues:
+    - wms.inventory.confirm.queue
+
 serviceAccount:
   create: true
   name: wms-sa
