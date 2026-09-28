@@ -63,3 +63,23 @@
 ### 시크릿 접근 통제 (RBAC)
 * 데이터베이스 접속 자격 증명(Credential Secret)에 대한 `get`, `list` 권한은 `shared-mysql-secret-reader` 역할(Role/ClusterRole)을 통해서만 제한적으로 부여
 * **인가 대상자**: 임종원, 이재혁 (화이트리스트 관리자 한정)
+
+---
+
+## 5. 감사 로그 (Audit Logging)
+
+* **엔진**: MySQL Community에는 감사 플러그인이 없어(Enterprise 전용) 동일 버전의 오픈소스 드롭인 대체재 **Percona Server for MySQL 8.0.41**을 사용하고 번들된 `audit_log` 플러그인을 로드
+  * 이미지: `image/Dockerfile` → `.github/workflows/build-moco-mysql.yml`이 스모크 테스트(초기화 + `audit_log` ACTIVE) 후 ECR `kurly-moco-mysql`에 amd64/arm64로 push
+  * 배포 순서: **이미지 push 완료 → 매니페스트 반영**. `audit_log=FORCE_PLUS_PERMANENT`라 플러그인이 없는 이미지로는 mysqld가 기동하지 않음(MOCO rolling update는 첫 파드에서 멈추고 나머지는 기존 상태 유지)
+* **설정** (`overlays/eks/password-policy-configmap.yaml`): `audit_log_policy=ALL`(로그인+쿼리), JSON 포맷, `/var/log/mysql/audit.log`, 100MiB × 6개 로테이션
+* **조회**: `audit-log` 사이드카가 파일을 stdout으로 내보냄 → `kubectl -n backend logs <pod> -c audit-log`. 파드 exec/logs 권한은 관리자 화이트리스트(임종원, 이재혁)로 제한
+* **확인**:
+  ```sql
+  SELECT PLUGIN_NAME, PLUGIN_STATUS, LOAD_OPTION FROM information_schema.PLUGINS WHERE PLUGIN_TYPE = 'AUDIT';
+  -- audit_log | ACTIVE | FORCE_PLUS_PERMANENT
+  ```
+* **CloudWatch 연동(D-26)**: 미구현 — 노드 로그 수집기(Fluent Bit 등) 도입 시 `audit-log` 컨테이너 로그만 선별 수집하도록 구성
+
+## 6. 설정·인증서 볼륨 권한 (D-14)
+
+MOCO 오퍼레이터가 `mysql-conf`, `my-cnf-secret`, `grpc-cert`, `slow-fluent-bit-config` 볼륨을 `defaultMode: 0644`로 **하드코딩**해 생성합니다(moco `controllers/mysqlcluster_controller.go`). `MySQLCluster` 스펙에 이를 바꾸는 필드가 없고, StatefulSet을 직접 수정하면 오퍼레이터가 원복하므로 매니페스트로는 변경할 수 없습니다. 보완 통제: 파드 내 모든 컨테이너가 동일 uid(10000)로 실행되고 `runAsNonRoot`, 파드 exec 권한은 관리자 화이트리스트로 제한됩니다.

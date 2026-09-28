@@ -83,4 +83,11 @@ spec:
           port: 9081
     - ports:
         - protocol: TCP
-          port: 9081  # Kubelet(노드 호스트)의 HTTP 헬스체크(/healthz, /readyz) 허용
+          port: 9081
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9081

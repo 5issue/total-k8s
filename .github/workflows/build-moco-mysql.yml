@@ -1,0 +1,81 @@
+name: Build - moco-mysql (Percona + audit_log)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workloads/mysql-shared/image/**'
+      - '.github/workflows/build-moco-mysql.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_TAG: 8.0.41-32.1
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 스모크 테스트 이미지 빌드 (amd64)
+        uses: docker/build-push-action@v5
+        with:
+          context: workloads/mysql-shared/image
+          platforms: linux/amd64
+          load: true
+          tags: moco-mysql:test
+
+      - name: 스모크 테스트 (moco-init 초기화 + audit_log ACTIVE)
+        run: |
+          set -eu
+          docker run -d --name t --user 10000:10000 --entrypoint sh moco-mysql:test -c '
+            set -e
+            mysqld --basedir=/usr/local/mysql --datadir=/tmp/d --initialize-insecure
+            exec mysqld --no-defaults --datadir=/tmp/d --socket=/tmp/s.sock --pid-file=/tmp/p.pid \
+              --mysqlx=OFF --loose-percona-telemetry-disable=ON \
+              --plugin-load-add=audit_log.so --audit-log=FORCE_PLUS_PERMANENT \
+              --audit-log-file=/tmp/audit.log --audit-log-format=JSON --audit-log-policy=ALL'
+          for i in $(seq 1 60); do
+            docker exec t mysqladmin -uroot -S /tmp/s.sock ping --silent && break
+            sleep 2
+          done
+          status=$(docker exec t mysql -uroot -S /tmp/s.sock -N -e \
+            "SELECT PLUGIN_STATUS FROM information_schema.PLUGINS WHERE PLUGIN_NAME='audit_log' AND PLUGIN_TYPE='AUDIT'")
+          echo "audit_log=${status}"
+          test "${status}" = "ACTIVE"
+          docker exec t mysql -uroot -S /tmp/s.sock -e "SELECT 1" > /dev/null
+          docker exec t sh -c 'test -s /tmp/audit.log && tail -n 2 /tmp/audit.log'
+
+      - name: 스모크 테스트 로그
+        if: failure()
+        run: docker logs t || true
+
+      - name: AWS 자격증명 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: ECR 로그인
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 이미지 빌드·push (멀티 아키텍처)
+        uses: docker/build-push-action@v5
+        with:
+          context: workloads/mysql-shared/image
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.ecr-login.outputs.registry }}/kurly-moco-mysql:${{ env.IMAGE_TAG }}
+            ${{ steps.ecr-login.outputs.registry }}/kurly-moco-mysql:${{ github.sha }}
