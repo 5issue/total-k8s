@@ -52,17 +52,14 @@ spec:
                   key: {{ .Values.database.passwordKey }}
             - name: ENVIRONMENT
               value: "{{ .Values.environment }}"
-            - name: LLM_PROVIDER
-              value: "{{ .Values.llm.provider }}"
-            - name: LLM_MODEL
-              value: "{{ .Values.llm.model }}"
-            - name: LLM_BASE_URL
-              value: "{{ .Values.llm.baseUrl }}"
-            - name: LLM_API_KEY
+            # 추천 이유 LLM (AI팀 가이드 3-3): serving은 이 두 변수만 읽음
+            - name: OPENROUTER_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.llm.apiKeySecret }}
-                  key: LLM_API_KEY
+                  key: LLM_API_KEY          # Secret 안의 키 이름은 그대로 사용 (Terraform 변경 불필요)
+            - name: REASON_MODEL
+              value: "{{ .Values.llm.reasonModel }}"
             - name: DATABASE_URL
               value: "postgresql://{{ .Values.database.username }}:$(DB_PASSWORD)@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}?sslmode=disable"
           livenessProbe:
