@@ -1,6 +1,6 @@
 # RabbitMQ CA 신뢰 정보 배포 Runbook
 
-RabbitMQ public CA trust의 배포 및 CA 교체 시 실행 방법을 정의합니다.
+RabbitMQ private CA의 trust 배포 및 CA 교체 시 실행 방법을 정의합니다.
 
 ## 배포 계약
 

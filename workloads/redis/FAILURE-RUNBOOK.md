@@ -28,7 +28,7 @@ kubectl -n backend describe pod redis-0
 4. Credential을 현재 `AWSCURRENT` 기준으로 다시 publication합니다.
 5. Redis Ready 및 authenticated `PING/PONG`을 확인합니다.
 
-Credential publication과 검증은 [CREDENTIAL-PUBLICATION-RUNBOOK.md](CREDENTIAL-PUBLICATION-RUNBOOK.md)를 따릅니다.
+Credential publication과 검증은 total-infra의 Workload Secret Publication Runbook을 따릅니다.
 
 ## Pod 장애
 
