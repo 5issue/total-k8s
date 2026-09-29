@@ -41,7 +41,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.serverPort }}   # 컨테이너 포트 (8080 공통)
-          env:                              # ↓ 컨테이너에 넣을 환경변수
+          env: # ↓ 컨테이너에 넣을 환경변수
+             {{- if .Values.javaToolOptions }}
+            - name: JAVA_TOOL_OPTIONS
+              value: {{ .Values.javaToolOptions | quote }}
+             {{- end }}
             - name: SERVER_PORT
               value: "{{ .Values.serverPort }}"
             # RabbitMQ (values.yaml의 5671 + SSL이 여기로 들어감)
