@@ -31,5 +31,5 @@ authConfig:
   redirectUriNaver: "https://api.cloudyim.store/api/v1/auth/oauth/naver/callback"
   allowedRedirectUris: "https://cloudyim.store,https://cloudyim.store/callback/naver,https://cloudyim.store/callback/kakao,https://api.cloudyim.store/api/v1/auth/oauth/kakao/callback,https://api.cloudyim.store/api/v1/auth/oauth/naver/callback"
   frontendRedirectUri: "https://cloudyim.store/oauth/callback"
-  kakaoClientId: "dummy-kakao-client-id"
-  naverClientId: "dummy-naver-client-id"
+  kakaoClientId: "e20c8bb54972985dd19adfa73f8ccf90"
+  naverClientId: "pwW8VwtaAOtSSrRAwsl7"

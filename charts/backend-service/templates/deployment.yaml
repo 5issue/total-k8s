@@ -118,8 +118,12 @@ spec:
               value: {{ .Values.authConfig.redirectUriKakao | quote }}
             - name: OAUTH_REDIRECT_URI_NAVER
               value: {{ .Values.authConfig.redirectUriNaver | quote }}
-            - name: OAUTH_ALLOWED_REDIRECT_URIS
-              value: {{ .Values.authConfig.allowedRedirectUris | quote }}
+            {{- if .Values.authConfig.allowedRedirectUris }}
+            {{- range $index, $uri := splitList "," .Values.authConfig.allowedRedirectUris }}
+            - name: OAUTH_ALLOWED_REDIRECT_URIS_{{ $index }}
+              value: {{ $uri | trim | quote }}
+            {{- end }}
+            {{- end }}
             - name: OAUTH_FRONTEND_REDIRECT_URI
               value: {{ .Values.authConfig.frontendRedirectUri | quote }}
             - name: KAKAO_CLIENT_ID
