@@ -33,3 +33,5 @@ authConfig:
   frontendRedirectUri: "https://cloudyim.store/oauth/callback"
   kakaoClientId: "e20c8bb54972985dd19adfa73f8ccf90"
   naverClientId: "pwW8VwtaAOtSSrRAwsl7"
+  naverAuthorizeUri: "https://nid.naver.com/oauth2.0/authorize"
+  naverTokenUri: "https://nid.naver.com/oauth2.0/token"
