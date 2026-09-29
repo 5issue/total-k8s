@@ -13,3 +13,12 @@ configMapGenerator:
         app.kubernetes.io/name: platform-observability
         app.kubernetes.io/component: dashboard
         grafana_dashboard: "1"
+  - name: load-test-overview-grafana-dashboard
+    files:
+      - load-test-overview.json=dashboards/load-test-overview.json
+    options:
+      disableNameSuffixHash: true
+      labels:
+        app.kubernetes.io/name: platform-observability
+        app.kubernetes.io/component: dashboard
+        grafana_dashboard: "1"
