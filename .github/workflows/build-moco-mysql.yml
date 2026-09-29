@@ -37,7 +37,7 @@ jobs:
       - name: 스모크 테스트 (moco-init 초기화 + audit_log ACTIVE)
         run: |
           set -eu
-          docker run -d --name t --user 10000:10000 --entrypoint sh moco-mysql:test -c '
+          docker run -d --name smoketest --user 10000:10000 --entrypoint sh moco-mysql:test -c '
             set -e
             mysqld --basedir=/usr/local/mysql --datadir=/tmp/d --initialize-insecure
             exec mysqld --no-defaults --datadir=/tmp/d --socket=/tmp/s.sock --pid-file=/tmp/p.pid \
@@ -45,19 +45,19 @@ jobs:
               --plugin-load-add=audit_log.so --audit-log=FORCE_PLUS_PERMANENT \
               --audit-log-file=/tmp/audit.log --audit-log-format=JSON --audit-log-policy=ALL'
           for i in $(seq 1 60); do
-            docker exec t mysqladmin -uroot -S /tmp/s.sock ping --silent && break
+            docker exec smoketest mysqladmin -uroot -S /tmp/s.sock ping --silent && break
             sleep 2
           done
-          status=$(docker exec t mysql -uroot -S /tmp/s.sock -N -e \
+          status=$(docker exec smoketest mysql -uroot -S /tmp/s.sock -N -e \
             "SELECT PLUGIN_STATUS FROM information_schema.PLUGINS WHERE PLUGIN_NAME='audit_log' AND PLUGIN_TYPE='AUDIT'")
           echo "audit_log=${status}"
           test "${status}" = "ACTIVE"
-          docker exec t mysql -uroot -S /tmp/s.sock -e "SELECT 1" > /dev/null
-          docker exec t sh -c 'test -s /tmp/audit.log && tail -n 2 /tmp/audit.log'
+          docker exec smoketest mysql -uroot -S /tmp/s.sock -e "SELECT 1" > /dev/null
+          docker exec smoketest sh -c 'test -s /tmp/audit.log && tail -n 2 /tmp/audit.log'
 
       - name: 스모크 테스트 로그
         if: failure()
-        run: docker logs t || true
+        run: docker logs smoketest || true
 
       - name: AWS 자격증명 설정
         uses: aws-actions/configure-aws-credentials@v4
