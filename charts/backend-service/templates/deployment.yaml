@@ -130,6 +130,10 @@ spec:
               value: {{ .Values.authConfig.kakaoClientId | quote }}
             - name: NAVER_CLIENT_ID
               value: {{ .Values.authConfig.naverClientId | quote }}
+            - name: NAVER_AUTHORIZE_URI
+              value: {{ .Values.authConfig.naverAuthorizeUri | default "https://nid.naver.com/oauth2.0/authorize" | quote }}
+            - name: NAVER_TOKEN_URI
+              value: {{ .Values.authConfig.naverTokenUri | default "https://nid.naver.com/oauth2.0/token" | quote }}
             - name: KAKAO_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
