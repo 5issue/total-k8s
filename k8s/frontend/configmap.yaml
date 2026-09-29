@@ -12,5 +12,7 @@ data:
   #    이 ConfigMap 은 "서버 런타임에서만 읽는" 값에 사용한다.
   API_INTERNAL_URL: "http://api-internal.default.svc.cluster.local"
 
+  AI_SERVICE_INTERNAL_URL: "http://kurly-ai-serving.backend.svc.cluster.local:8000"
+
   # 참고용(서버 로깅/분기용). 브라우저 인라인 값은 빌드 타임 것이 최종.
   NEXT_PUBLIC_APP_ENV: "production"
