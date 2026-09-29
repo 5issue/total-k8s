@@ -29,7 +29,7 @@ authConfig:
   jwtKmsKeyId: "alias/auth-jwt-signing"
   redirectUriKakao: "https://api.cloudyim.store/api/v1/auth/oauth/kakao/callback"
   redirectUriNaver: "https://api.cloudyim.store/api/v1/auth/oauth/naver/callback"
-  allowedRedirectUris: "https://cloudyim.store,https://api.cloudyim.store/api/v1/auth/oauth/kakao/callback,https://api.cloudyim.store/api/v1/auth/oauth/naver/callback"
+  allowedRedirectUris: "https://cloudyim.store,https://cloudyim.store/callback/naver,https://cloudyim.store/callback/kakao,https://api.cloudyim.store/api/v1/auth/oauth/kakao/callback,https://api.cloudyim.store/api/v1/auth/oauth/naver/callback"
   frontendRedirectUri: "https://cloudyim.store/oauth/callback"
   kakaoClientId: "dummy-kakao-client-id"
   naverClientId: "dummy-naver-client-id"
