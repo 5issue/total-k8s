@@ -10,16 +10,17 @@ the `platform-observability` application.
 
 - k6 RPS, error rate, p95 and p99
 - workload replicas and HPA desired replicas
-- Pod CPU and memory usage as a percentage of limits
+- backend service CPU and memory usage as a percentage of limits
 - Pod restarts, Pending Pods and Not Ready Pods
-- node CPU and memory usage
+- node CPU and memory usage split into On-Demand and Spot series
 - Redis throughput and clients
 - RabbitMQ queue depth and message rate
 - PostgreSQL/MySQL connections when their exporters expose the metrics
 - firing Prometheus alerts, excluding Watchdog
 
-Use the `Namespace`, `Workload`, `Pod`, and `k6 Test ID` variables to scope a
-test. Set the dashboard time range to the k6 execution window.
+The dashboard intentionally observes only the production `backend` namespace.
+Use the `Workload` and `k6 Test ID` variables to scope a test. Set the dashboard
+time range to the k6 execution window.
 
 ## Stream k6 metrics
 
