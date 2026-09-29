@@ -27,3 +27,14 @@ serviceAccount:
   name: product-sa
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::596601390909:role/product-service-irsa
+javaToolOptions: >-
+  -XX:InitialRAMPercentage=25.0
+  -XX:MaxRAMPercentage=50.0
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "1Gi"

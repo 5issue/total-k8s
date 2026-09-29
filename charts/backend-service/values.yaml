@@ -100,3 +100,4 @@ appConfig:
 # 배치: 백엔드는 Karpenter Spot 노드에만 (On-Demand는 DB·Redis 등 상태 저장 전용)
 nodeSelector:
   karpenter.sh/capacity-type: spot
+javaToolOptions: ""
