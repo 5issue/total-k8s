@@ -47,3 +47,6 @@ spec:
     name: shared-pg
   name: ai_db
   owner: ai_user
+  extensions:
+    - name: vector
+      ensure: present
