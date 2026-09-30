@@ -214,7 +214,13 @@ spec:
               value: "$(DB_PASSWORD)"
             {{- end }}
             {{- end }}
-           # 생존 검사 — 실패하면 컨테이너 재시작
+           # 시작 검사 — 애플리케이션 초기 기동 완료 전 liveness 재시작 방지
+          startupProbe:
+            tcpSocket:
+              port: {{ .Values.serverPort }}
+            periodSeconds: 10
+            failureThreshold: 30
+          # 생존 검사 — 실패하면 컨테이너 재시작
           livenessProbe:
             tcpSocket:
               port: {{ .Values.serverPort }}
