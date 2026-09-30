@@ -49,6 +49,16 @@ spec:
                 REFERENCES, TRIGGER, LOCK TABLES, CREATE TEMPORARY TABLES
                 ON *.* TO 'dba_admin'@'%';
 
+              -- D-09: 로그인 5회 실패 시 1일 잠금. moco-* 시스템 계정은 오퍼레이터가
+              -- 잠기면 복제·장애조치가 멈추므로 제외한다.
+              ALTER USER 'auth_user'@'%', 'order_user'@'%', 'payment_user'@'%',
+                'user_user'@'%', 'dba_admin'@'%'
+                FAILED_LOGIN_ATTEMPTS 5 PASSWORD_LOCK_TIME 1;
+
+              -- D-03: dba_admin 비밀번호 DB 만료 90일. 교체 CronJob이 85일마다
+              -- 교체하므로 만료 전에 항상 새 비밀번호로 바뀐다.
+              ALTER USER 'dba_admin'@'%' PASSWORD EXPIRE INTERVAL 90 DAY;
+
               FLUSH PRIVILEGES;
               SQL
 
