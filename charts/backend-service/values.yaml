@@ -16,11 +16,11 @@ service:
 # 리소스 (CPU·메모리 최소/최대)
 resources:
   requests:                   # 최소 보장
-    cpu: "100m"               # 0.1 CPU
-    memory: "256Mi"
-  limits:                     # 최대 상한
-    cpu: "500m"               # 0.5 CPU
+    cpu: "300m"               # 0.3 CPU
     memory: "512Mi"
+  limits:                     # 최대 상한
+    cpu: "1000m"              # 1.0 CPU
+    memory: "1024Mi"          # 1.0 GiB (OOMKilled 방지 상한선)
 
 # RabbitMQ (메시징) — ★ 5671 + SSL 확정 반영
 rabbitmq:
