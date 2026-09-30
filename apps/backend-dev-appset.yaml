@@ -32,6 +32,14 @@ spec:
           parameters:
             - name: replicaCount
               value: "1"
+            - name: resources.requests.cpu
+              value: "50m"
+            - name: resources.requests.memory
+              value: "256Mi"
+            - name: resources.limits.cpu
+              value: "500m"
+            - name: resources.limits.memory
+              value: "512Mi"
       destination:
         server: 'https://kubernetes.default.svc'
         namespace: dev                    # 배포할 네임스페이스를 dev로 지정
