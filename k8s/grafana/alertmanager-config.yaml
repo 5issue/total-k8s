@@ -29,7 +29,7 @@ spec:
           - name: severity
             value: warning
             matchType: "="
-        groupWait: 1m
+        groupWait: 15s
         repeatInterval: 4h
 
   receivers:

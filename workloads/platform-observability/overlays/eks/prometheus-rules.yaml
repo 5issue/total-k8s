@@ -1,0 +1,51 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: backend-deployment-availability
+  labels:
+    app.kubernetes.io/name: platform-observability
+    app.kubernetes.io/component: alert-rules
+    release: prometheus
+spec:
+  groups:
+    - name: backend-deployment-availability.rules
+      interval: 15s
+      rules:
+        - alert: BackendDeploymentReplicasUnavailable
+          expr: |
+            (
+              kube_deployment_spec_replicas{namespace="backend"} > 0
+            )
+            and on (namespace, deployment)
+            (
+              kube_deployment_status_replicas_available{namespace="backend"}
+                < kube_deployment_spec_replicas{namespace="backend"}
+            )
+            and on (namespace, deployment)
+            (
+            changes(kube_deployment_status_replicas_updated{namespace="backend"}[2m]) == 0
+            )
+          for: 30s
+          labels:
+            severity: warning
+            service: '{{ $labels.deployment }}'
+          annotations:
+            summary: Backend Deployment 가용 Replica 감소
+            description: '{{ $labels.namespace }}/{{ $labels.deployment }}의 가용 Replica가 목표 개수보다 30초 이상 부족합니다.'
+
+        - alert: BackendDeploymentUnavailable
+          expr: |
+            (
+              kube_deployment_spec_replicas{namespace="backend"} > 0
+            )
+            and on (namespace, deployment)
+            (
+              kube_deployment_status_replicas_available{namespace="backend"} == 0
+            )
+          for: 15s
+          labels:
+            severity: critical
+            service: '{{ $labels.deployment }}'
+          annotations:
+            summary: Backend Deployment 전체 가용성 상실
+            description: '{{ $labels.namespace }}/{{ $labels.deployment }}의 가용 Replica가 15초 이상 0개입니다.'
