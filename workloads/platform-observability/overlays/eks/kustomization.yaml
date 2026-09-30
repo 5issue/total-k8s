@@ -3,6 +3,9 @@ kind: Kustomization
 
 namespace: prometheus
 
+resources:
+  - prometheus-rules.yaml
+
 configMapGenerator:
   - name: platform-overview-grafana-dashboard
     files:
