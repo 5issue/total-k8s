@@ -8,4 +8,4 @@ metadata:
     app.kubernetes.io/component: database
 spec:
   instances: 2
-  imageName: ghcr.io/cloudnative-pg/postgresql:16.10
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.15

@@ -8,7 +8,7 @@
       - pgaudit
       - passwordcheck
     parameters:
-      max_connections: "250"
+      max_connections: "100"
       pgaudit.log: "all, -misc"
       pgaudit.log_catalog: "off"
       pgaudit.log_parameter: "on"
@@ -109,3 +109,7 @@
           - pg_write_all_data
         passwordSecret:
           name: shared-pg-dba-admin-credentials
+      # CNPG initdb가 기본 생성하는 app 계정(app DB owner). 사용처가 없어 로그인만 차단(D-02)
+      - name: app
+        ensure: present
+        login: false
