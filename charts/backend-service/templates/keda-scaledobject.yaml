@@ -16,6 +16,12 @@ spec:
         scaleDown:
           stabilizationWindowSeconds: {{ .Values.keda.scaleDownStabilizationWindowSeconds }}
   triggers:
+    {{- if .Values.keda.cpu.enabled }}
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: {{ .Values.keda.cpu.utilization | quote }}
+    {{- end }}
     {{- range .Values.keda.queues }}
     - type: rabbitmq
       metadata:
