@@ -3,11 +3,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - configmap.yaml
-  - deployment.yaml
-  - pdb.yaml
-  - serviceAccount.yaml
+- configmap.yaml
+- deployment.yaml
+- pdb.yaml
+- serviceAccount.yaml
   
 images:
-  - name: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-frontend
-    newTag: latest
+- name: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-frontend
+  newTag: 705adcd8428cc9177b4cc11acbadc862d3f29d05
