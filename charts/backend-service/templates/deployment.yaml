@@ -5,6 +5,11 @@ metadata:
   name: {{ .Values.serviceName }}          # values의 serviceName이 채워짐 (예: auth-service)
 spec:
   replicas: {{ .Values.replicaCount }}      # 파드 개수 (values에서)
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0        # 새 파드를 먼저 늘리지 않음
+      maxUnavailable: 1  # 1개 먼저 죽이고 그 자리에 새 파드 생성
   selector:
     matchLabels:
       app: {{ .Values.serviceName }}        # 이 라벨 붙은 파드를 내가 관리한다
