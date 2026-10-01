@@ -16,7 +16,7 @@ service:
 # 리소스 (CPU·메모리 최소/최대)
 resources:
   requests:                   # 최소 보장
-    cpu: "50m"               # 0.05 CPU
+    cpu: "200m"               # 0.05 CPU
     memory: "256Mi"
   limits:                     # 최대 상한
     cpu: "500m"              # 0.5 CPU
