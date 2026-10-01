@@ -73,13 +73,17 @@ networkPolicy:
     - 172.31.48.0/20
     # 2. 내부 프라이빗 대역 (노드/파드 VPC 내부 통신용)
     - 10.0.0.0/16
-# KEDA RabbitMQ Queue 기반 자동 확장
+# KEDA 다중 트리거 자동 확장
+# RabbitMQ 큐 적재와 API 요청으로 인한 CPU 포화 중 하나라도 기준을 넘으면 확장합니다.
 # dev 환경에서는 기본적으로 비활성화하고 운영 ApplicationSet에서만 활성화합니다.
 keda:
   enabled: false
   minReplicaCount: 2
   maxReplicaCount: 10
   queueLength: "30"
+  cpu:
+    enabled: true
+    utilization: "70"
   scaleDownStabilizationWindowSeconds: 300
   queues: []
 
