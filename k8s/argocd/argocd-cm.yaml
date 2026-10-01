@@ -24,3 +24,5 @@ data:
             - name: "5issue"
               teams:
                 - infra
+                - backend
+                - frontend
