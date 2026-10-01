@@ -8,7 +8,7 @@
       - pgaudit
       - passwordcheck
     parameters:
-      max_connections: "100"
+      max_connections: "300"
       pgaudit.log: "all, -misc"
       pgaudit.log_catalog: "off"
       pgaudit.log_parameter: "on"
