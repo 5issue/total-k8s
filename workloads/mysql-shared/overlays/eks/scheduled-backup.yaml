@@ -6,6 +6,12 @@ spec:
   schedule: "0 16 * * *"
   jobConfig:
     serviceAccountName: shared-mysql-backup
+    # 기본값(cpu 4, memory 4Gi)은 노드에 들어갈 자리가 없어 Job이 Pending으로 멈춤
+    cpu: 500m
+    maxCpu: "1"
+    memory: 1Gi
+    maxMemory: 2Gi
+    threads: 2
     bucketConfig:
       bucketName: kurly-mysql-backup
       region: ap-northeast-2

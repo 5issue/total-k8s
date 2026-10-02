@@ -55,6 +55,8 @@
     retentionPolicy: "30d"
     barmanObjectStore:
       destinationPath: "s3://kurly-db-backup/shared-pg"
+      # 클러스터 재생성 시 이전 세대 WAL과 충돌(Expected empty archive)하므로 세대별로 경로 분리
+      serverName: shared-pg-v2
       s3Credentials:
         inheritFromIAMRole: true
       wal:

@@ -1,0 +1,65 @@
+# 복원 검증용 MySQLCluster (ArgoCD 미관리, 수동 apply 후 검증이 끝나면 삭제)
+# 사용법:
+#   1. restorePoint를 복원할 시각(RFC3339, UTC)으로 수정
+#   2. kubectl apply -f mysqlcluster-restore.yaml
+#   3. 검증 후 kubectl delete -f mysqlcluster-restore.yaml && kubectl delete pvc -n backend -l app.kubernetes.io/instance=shared-mysql-restore
+# 운영 클러스터와 달리 On-Demand 제약을 두지 않아 Spot 노드에 배치될 수 있다.
+apiVersion: moco.cybozu.com/v1beta2
+kind: MySQLCluster
+metadata:
+  name: shared-mysql-restore
+  namespace: backend
+  labels:
+    app.kubernetes.io/name: shared-mysql-restore
+    app.kubernetes.io/component: database-restore-test
+spec:
+  replicas: 3
+  mysqlConfigMapName: shared-mysql-password-policy
+  restore:
+    sourceName: shared-mysql
+    sourceNamespace: backend
+    restorePoint: "2026-10-02T00:00:00Z"
+    jobConfig:
+      serviceAccountName: shared-mysql-backup
+      cpu: 500m
+      maxCpu: "1"
+      memory: 1Gi
+      maxMemory: 2Gi
+      threads: 2
+      bucketConfig:
+        bucketName: kurly-mysql-backup
+        region: ap-northeast-2
+      workVolume:
+        emptyDir: {}
+  podTemplate:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 10000
+        fsGroupChangePolicy: "OnRootMismatch"
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mysqld
+          image: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-moco-mysql:8.0.41-32.1
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1.5Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: gp3
+        resources:
+          requests:
+            storage: 10Gi
