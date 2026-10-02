@@ -3,7 +3,7 @@ serviceName: product-service        # 이 서비스 이름
 replicaCount: 2
 image:
   repository: kurly-product              # ECR 창고 이름
-  tag: "c6fda5f928b3fe639370189e4e0fe1f55e0de870"
+  tag: "75efac7f2b1959c8d8459c066d4df3624a35c829"
 
 
 database:
