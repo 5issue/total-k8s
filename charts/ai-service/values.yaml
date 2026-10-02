@@ -52,6 +52,13 @@ llm:
   reasonModel: "google/gemini-3.5-flash-lite"   # OpenRouter 모델명 (AI팀 가이드 3-3)
   apiKeySecret: ai-llm-secret                   # OPENROUTER_API_KEY를 꺼낼 Secret
 
+# Bearer(JWT) 검증 설정 — BFF의 Bearer 전파 배포와 같은 시점에 적용
+jwt:
+  issuer: "https://api.cloudyim.store"          # auth-service JWT_ISSUER와 동일 (끝 슬래시 없음)
+  audience: "cloudyim-client"
+  algorithms: "ES256"
+  jwksUrl: "http://auth-service:8080/.well-known/jwks.json"   # 같은 네임스페이스의 auth-service (backend/dev 공용)
+
 # 배치: AI는 Karpenter Spot 노드에만 (On-Demand는 DB·Redis 등 상태 저장 전용)
 nodeSelector:
   karpenter.sh/capacity-type: spot

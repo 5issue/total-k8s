@@ -64,6 +64,14 @@ spec:
                   key: LLM_API_KEY          # Secret 안의 키 이름은 그대로 사용 (Terraform 변경 불필요)
             - name: REASON_MODEL
               value: "{{ .Values.llm.reasonModel }}"
+            - name: JWT_ISSUER
+              value: "{{ .Values.jwt.issuer }}"
+            - name: JWT_AUDIENCE
+              value: "{{ .Values.jwt.audience }}"
+            - name: JWT_ALGORITHMS
+              value: "{{ .Values.jwt.algorithms }}"
+            - name: JWT_JWKS_URL
+              value: "{{ .Values.jwt.jwksUrl }}"
             - name: DATABASE_URL
               value: "postgresql://{{ .Values.database.username }}:$(DB_PASSWORD)@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}?sslmode=disable"
           livenessProbe:
