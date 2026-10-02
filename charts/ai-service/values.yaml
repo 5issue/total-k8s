@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   registry: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com
   repository: kurly-ai-assistant
-  tag: "debe0c0920fd4194e60d127fbb9580af3db6297c"
+  tag: "685bca9c6345f3ed5c3199948090c7b32d7b3e88"
   pullPolicy: Always
 
 serverPort: 8000
