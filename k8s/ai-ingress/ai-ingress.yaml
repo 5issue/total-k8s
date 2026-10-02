@@ -29,6 +29,22 @@ spec:
                 name: kurly-ai-serving
                 port:
                   number: 8000
+          # 찜한 레시피 목록 / 찜 / 찜 취소 (My 레시피 화면)
+          - path: /api/v1/users/me/favorite-recipes
+            pathType: Prefix
+            backend:
+              service:
+                name: kurly-ai-serving
+                port:
+                  number: 8000
+          # 최근 본 레시피 목록 / 조회 기록 / 선택 삭제 (My 레시피 화면)
+          - path: /api/v1/users/me/recent-recipes
+            pathType: Prefix
+            backend:
+              service:
+                name: kurly-ai-serving
+                port:
+                  number: 8000
           # 버블 기반 상품 추천    
           - path: /api/v1/recommendations/products
             pathType: Prefix
