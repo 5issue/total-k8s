@@ -1,0 +1,48 @@
+# 복원 검증용 CNPG Cluster (ArgoCD 미관리, 수동 apply 후 검증이 끝나면 삭제)
+# 사용법:
+#   1. 특정 시점으로 복원하려면 recoveryTarget.targetTime 주석을 풀고 시각(RFC3339)을 지정 (없으면 마지막 WAL까지 복원)
+#   2. kubectl apply -f cluster-restore.yaml
+#   3. 검증 후 kubectl delete -f cluster-restore.yaml (PVC는 Cluster와 함께 삭제됨)
+# cnpg-s3-backup-role의 IRSA 신뢰 정책이 backend:shared-pg만 허용하므로 기존 ServiceAccount를 재사용한다.
+# 복원 클러스터는 backup 설정이 없어 운영 백업 경로에 WAL을 쓰지 않는다.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: shared-pg-restore
+  namespace: backend
+  labels:
+    app.kubernetes.io/name: shared-pg-restore
+    app.kubernetes.io/component: database-restore-test
+spec:
+  instances: 2
+  imageName: ghcr.io/cloudnative-pg/postgresql:16.15
+  serviceAccountName: shared-pg
+  enableSuperuserAccess: false
+  postgresql:
+    shared_preload_libraries:
+      - pgaudit
+      - passwordcheck
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1.5Gi
+  storage:
+    storageClass: gp3
+    size: 10Gi
+  bootstrap:
+    recovery:
+      source: shared-pg-backup
+      # recoveryTarget:
+      #   targetTime: "2026-10-02T00:00:00Z"
+  externalClusters:
+    - name: shared-pg-backup
+      barmanObjectStore:
+        destinationPath: "s3://kurly-db-backup/shared-pg"
+        serverName: shared-pg-v2
+        s3Credentials:
+          inheritFromIAMRole: true
+        wal:
+          maxParallel: 2
