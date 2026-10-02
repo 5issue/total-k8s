@@ -36,6 +36,9 @@ spec:
             # 명세서 반영: 토큰 서명 재검증을 위해 내부 auth 서비스의 JWKS 조회
             - name: AUTH_JWKS_URI
               value: "http://auth-service.backend.svc.cluster.local:8080/.well-known/jwks.json"
+            # AI 서비스 내부 호출 주소
+            - name: AI_BASE_URL
+              value: "http://kurly-ai-serving.backend.svc.cluster.local:8000"
             # 비동기 통신을 위한 내부 RabbitMQ 주소
             - name: SPRING_RABBITMQ_HOST
               value: "rabbitmq.messaging.svc.cluster.local"
