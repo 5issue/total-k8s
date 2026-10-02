@@ -2,6 +2,7 @@
 serviceName: user-service        # 이 서비스 이름
 image:
   repository: kurly-user              # ECR 창고 이름
+  tag: "75efac7f2b1959c8d8459c066d4df3624a35c829"
 
 database:
   type: mysql
