@@ -3,7 +3,7 @@ serviceName: auth-service        # 이 서비스 이름
 replicaCount: 2
 image:
   repository: kurly-auth              # ECR 창고 이름
-  tag: "75efac7f2b1959c8d8459c066d4df3624a35c829"
+  tag: "71ba25cf1cb2fd5bf6dde3744f4c103b08e62c4b"
 
 database:
   type: mysql
