@@ -2,7 +2,7 @@
 serviceName: scm-service # 이 서비스 이름
 image:
   repository: kurly-scm # ECR 창고 이름
-  tag: 8835bc47e89eecc2d182b3508002b44e6f77afcb
+  tag: "75efac7f2b1959c8d8459c066d4df3624a35c829"
 database:
   type: postgresql
   host: shared-pg-rw.backend.svc.cluster.local # TODO[1] 
