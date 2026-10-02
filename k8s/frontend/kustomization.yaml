@@ -10,4 +10,4 @@ resources:
   
 images:
 - name: 596601390909.dkr.ecr.ap-northeast-2.amazonaws.com/kurly-frontend
-  newTag: 1537aaa5e6fe4ba967527bb17c013b69cf1163a3
+  newTag: ac34b10bfa93e53b4bb57cb587527bd66f953fe9
