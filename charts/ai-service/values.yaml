@@ -53,14 +53,13 @@ llm:
   apiKeySecret: ai-llm-secret                   # OPENROUTER_API_KEY를 꺼낼 Secret
 
 # Bearer(JWT) 검증 설정 — BFF의 Bearer 전파 배포와 같은 시점에 적용
-# jwksUrl 이 스위치입니다. 비어 있으면 AI 서빙은 지금처럼 X-User-Id 헤더 방식으로 동작하고,
-# 값이 들어가는 순간 X-User-Id 는 무시되어 BFF 가 Bearer 를 보내기 전까지 사용자 API 가 전부 401 이 됩니다.
-# FE(BFF) 전파 준비가 끝나면 아래 주석의 값을 jwksUrl 에 넣는 PR 로 전환합니다.
+# jwksUrl 이 스위치입니다. 비어 있으면 X-User-Id 헤더 방식, 값이 있으면 Bearer JWT 만 받고 X-User-Id 는 무시합니다.
+# 2026-10-02 BFF 가 Authorization: Bearer 전파를 시작해 전환했습니다. 되돌리려면 jwksUrl 을 "" 로.
 jwt:
   issuer: "https://api.cloudyim.store"          # auth-service JWT_ISSUER와 동일 (끝 슬래시 없음)
   audience: "cloudyim-client"
   algorithms: "ES256"
-  jwksUrl: ""   # 전환 시 "http://auth-service:8080/.well-known/jwks.json" (같은 네임스페이스의 auth-service)
+  jwksUrl: "http://auth-service:8080/.well-known/jwks.json"   # 같은 backend 네임스페이스의 auth-service
 
 # 배치: AI는 Karpenter Spot 노드에만 (On-Demand는 DB·Redis 등 상태 저장 전용)
 nodeSelector:
