@@ -85,6 +85,10 @@ spec:
             - name: MEMBER_SERVICE_BASE_URL
               value: {{ .Values.memberServiceBaseUrl | quote }}
             {{- end }}
+            {{- if .Values.aiServiceBaseUrl }}
+            - name: AI_BASE_URL
+              value: {{ .Values.aiServiceBaseUrl | quote }}
+            {{- end }}
             # -------------------------------------------------------------
             # Payment 서비스 전용 Toss 및 클라이언트 설정
             # -------------------------------------------------------------
