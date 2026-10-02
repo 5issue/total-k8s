@@ -3,7 +3,7 @@ serviceName: order-service        # 이 서비스 이름
 replicaCount: 2
 image:
   repository: kurly-order              # ECR 창고 이름
-  tag: "71ba25cf1cb2fd5bf6dde3744f4c103b08e62c4b"
+  tag: "e22928f95686b44379877644141425cd3070ca11"
 
 database:
   type: mysql
