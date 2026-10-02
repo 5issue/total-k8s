@@ -2,6 +2,7 @@
 serviceName: oms-service
 image:
   repository: kurly-oms
+  tag: "75efac7f2b1959c8d8459c066d4df3624a35c829"
 
 rabbitmq:
   credentialsSecretName: rabbitmq-oms-credentials
